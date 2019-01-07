@@ -1,0 +1,34 @@
+
+Network can learn to fit a sin curve with exactly one period
+First it learns to replicate its own activation function (s curve) and then it slowly bends the ends down
+
+When attempting to map 1.5 periods (sin(1.5*3.14x) between -1 and 1), the network fails to generate any curve as it sticks with a linear output
+
+Since the solution to 1 period is likely a better solution than the straight line generated to solve 1.5 periods,
+I could try uploading a network used to solve 1 period, as a seed for solving 1.5 periods.
+Thus the network would only need to bend its ends to generate the desired curve.
+
+
+Ultimately, how can I automate this process if I am given a hard goal to fit (1.5 periods) without uploading a solution to a similar goal and tweaking it
+
+
+Maybe if I change the loss function?
+Make the network place much more effort into getting the general shape (removing outliers) than it does to optimising close values.
+Maybe change the loss function to a power of 4: (t-o)^4
+This would make values that are very close extremely small (0.1 difference goes to 0.0001)
+And value that a far apart relativaly bigger (0.5 -> 0.0625)
+
+Power of two: 0.5 / 0.1 -> 0.25 / 0.01 -> 25 bigger
+Power of four: 0.5 / 0.1 -> 0.0625 / 0.0001 -> 625x bigger
+
+625 / 25 = 25x bigger difference 
+
+Therefore network would value correcting the 0.5 offset 625x more than the 0.1 offset
+Compared to the 25x when using the current squared loss function
+
+
+
+
+By increasing the loss functions preference towards minimising big errors over optimising small ones, local minima are prevented
+How can I do this without needing to keep increasing the power?
+Logs?
