@@ -130,6 +130,9 @@ class NN():
 
 				# Apply activation function
 				layerOutput = math.tanh(layerOutput)
+				#if (l < len(self.structure)-1):
+				#	layerOutput = math.tanh(layerOutput)
+
 				self.netOutput[l][n] = layerOutput
 
 		if finalOutput:
@@ -157,8 +160,7 @@ class NN():
 		#print("Error: ", output, desired)
 		errorSum = 0
 		for i in range(len(output)):
-			errorSum += (output[i] - desired[i])**2	
-			#errorSum += (output[i] - desired[i])**4		
+			errorSum += (output[i] - desired[i])**2			
 		return errorSum
 
 

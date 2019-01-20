@@ -1,7 +1,7 @@
 
 
-import sys, math, pygame, random
-from NNPy import button, graph
+import sys, math, pygame, random, json
+from NNPy import button, graph, nn
 
 class Test_Mode():
 	def __init__(self, main):
@@ -21,6 +21,9 @@ class Test_Mode():
 
 		self.buttonList = [
 			button.Button(self.screen, pygame.Rect(750, 400, 150, 30), "Full Test", 30, self.fullTest),
+			button.Button(self.screen, pygame.Rect(750, 500, 150, 30), "Download", 30, self.downloadNetwork),
+			button.Button(self.screen, pygame.Rect(750, 540, 150, 30), "Upload", 30, self.uploadNetwork),
+			button.Button(self.screen, pygame.Rect(750, 600, 200, 30), "Create Submission", 30, self.createSubmission),
 			#button.Button(self.screen, pygame.Rect(720, 100, 30, 30), ">", 40, self.button_0),
 			#button.Button(self.screen, pygame.Rect(685, 100, 30, 30), "<", 40, self.button_1),
 			#button.Button(self.screen, pygame.Rect(685, 250, 100, 30), "Output", 30, self.getDigitOutput)
@@ -33,6 +36,10 @@ class Test_Mode():
 
 		# used to render
 		self.testOutput = ""
+
+
+
+		self.testData = []
 
 
 	def update(self, mouseState):	# Starts the main update loop
@@ -113,3 +120,105 @@ class Test_Mode():
 			self.digitNum -= 1
 			self.digitData = None
 			self.digitOutput = None
+
+	def downloadNetwork(self):
+		print("Downloading Network")
+		fileName = input("File Name: ")
+		file = open(fileName, "w")
+
+		fileString = ""
+		fileString += json.dumps(self.nn.structure)
+		fileString += "\n" + json.dumps(self.nn.LEARNING_RATE)
+		fileString += "\n" + json.dumps(self.nn.network)
+
+		file.write(fileString)
+		file.close()
+
+		print("Network saved to " + fileName)
+
+	def uploadNetwork(self):
+		print("Uploading Network")
+		fileName = input("File Name: ")
+		
+		netStructure = []
+		netLearning = 0
+		netNetwork = []
+		for i,k in enumerate(open(fileName, "r")):
+			if i==0:
+				netStructure = json.loads(k)
+			elif i==1:
+				netLearning = json.loads(k)
+			elif i==2:
+				netNetwork = json.loads(k)
+
+		self.main.nn = nn.NN(netStructure, netLearning)
+		self.main.nn.network = netNetwork
+		self.nn = self.main.nn
+
+		print("Network uploaded from " + fileName)
+
+
+
+	def createSubmission(self):
+		print("Creating Submission...")
+
+		print("Extracting Test Image Data...")
+		testDataLength = 28000
+		if (len(self.testData)==0):
+			testFile = open("test.csv")
+			for k,item in enumerate(testFile):
+				if k==0 or k>testDataLength: continue
+				else:
+					# Get pixel data
+					imageData = [int(x) for x in item.split(",")]	# Row of for that image
+
+					# Normalise pixel data from 0-255 to -1 to 1
+					imageData = [2*(x/255)-1 for x in imageData]
+
+					self.testData.append(imageData)
+
+					if (k % round(testDataLength/10) == 0):
+						print(str(round(100*k/testDataLength)) + "%")
+
+			print("Image Data Extracted, loaded " + str(len(self.testData)) + " images")
+			testFile.close()
+
+		else:
+			print("Test data already extracted")
+
+
+		# Perform test
+		print("Performing test")
+		submissionString = "ImageId,Label\n"
+		for k,img in enumerate(self.testData):
+			results = self.nn.getOutput(self.testData[k])
+			answer = results.index(max(results))
+
+			submissionString += str(k+1) + "," + str(answer) + "\n"
+
+			if k % round(testDataLength/100) == 0:
+				print(str(round(100*k/testDataLength)) + "%")
+
+		submissionFile = open("submission.csv", "w")
+		submissionFile.write("ImageId,Label\n")
+		submissionFile.close()
+
+		print("Submission complete")
+
+		# Perform test
+		'''print("Performing test")
+		submissionFile = open("submission.csv", "a")
+		submissionFile.write("ImageId,Label\n")
+		for k,img in enumerate(self.testData):
+			results = self.nn.getOutput(self.testData[k])
+
+			answer = results.index(max(results))
+
+			submissionFile.write(str(k+1) + "," + str(answer) + "\n")
+
+			if k % round(testDataLength/100) == 0:
+				print(str(round(100*k/testDataLength)) + "%")
+		submissionFile.close()
+
+		print("Submission complete")'''
+
