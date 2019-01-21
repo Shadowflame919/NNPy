@@ -1,6 +1,6 @@
 
 
-import math, pygame
+import math, pygame, numpy as np
 from .other import *
 
 class NN():
@@ -16,22 +16,50 @@ class NN():
 
 		'''
 			This stores the weights of the whole network
-			Each layer contains neurons which consists of their weights leading to next layer
-			Does not need to hold final layer of neurons because they have no weights
+			Each 'layer' of connections should be thought of as the weights between two layers of neurons, 
+			rather than being thought of as the neuron layers themselves
+			Layers consist of arrays which each represent the connections to a neuron in the next layer
+			For example the first array in layer 1 would contain all the weights connecting to neuron 1 in the next layer
+			This array would be ordered such that each connection is between the i'th neuron in layer 1, to the 1st neuron in layer 2
+			[0->0, 1->0, 2->0, 3->0]
+
 		'''
 		self.network = []
 		for l in range(len(self.structure)-1):	
 			layer = []
-			# Each layer has as many neurons in the layer, plus one bias neuron
-			for n in range(self.structure[l]+1):
-				neuron = []
-				for w in range(self.structure[l+1]):
+
+			# Each layer contains arrays which each represent all the connections from layer x, to a single neuron in layer x+1
+			# Therefore the number of arrays in a layer is the number of neurons in the next layer
+			for n in range(self.structure[l+1]):
+				neuron = []		# This array holds all the weights that connect to this neuron from the previous layer
+
+				# The number of weights connecting to a neuron is the number of neurons in the previous layer, plus a bias
+				for w in range(self.structure[l]+1):
 					weight = randFloat(self.MIN_STARTING_WEIGHT, self.MAX_STARTING_WEIGHT)
 					neuron.append(weight)
+
 				layer.append(neuron)
+
+
+			# Add a special array in layer to create an extra 1 on the output of the matrix multiplication to account for a bias input on the next layer calculation
+			# Array looks like [0,0,0,0,0,1] where length is the number of neurons in the previous layer + 1
+			# Final layer does not technically need this??? Check if final output removes the one when you remove array this on final layer
+			if l < len(self.structure)-2:
+				print(l)
+				biasArray = [0.0] * (self.structure[l]+1)
+				biasArray[-1] = 1.0
+				layer.append(biasArray)
+
+			layer = np.array(layer)
 			self.network.append(layer)
 
 
+
+		# Convert to numpy array (dimentions cannot be changed)
+		# This cannot be done! Each layer has a different number of neurons and thus differnet array size!! see -> numpy.array([[1,2],[3]])
+		#self.network = np.array(self.network, ndmin=3)
+
+		"""
 		''' 
 			Used to keep track of derivatives with respect to individual weights
 			Knowing dEdW means one can directly apply gradient descent to reduce error (E)
@@ -91,7 +119,7 @@ class NN():
 				layer.append(1)
 
 			self.netOutput.append(layer)
-
+		"""
 
 
 	def __str__(self):
@@ -108,6 +136,21 @@ class NN():
 
 	def getOutput(self, input, finalOutput=True):
 
+		#print("Shape: ", self.network[0].shape)
+
+		# Add bias 1 and set as the layerOutput for the input layer
+		layerOutput = np.array(input+[1])	
+		#print(layerOutput)
+
+		for i in self.network:
+			# Find the layerOutput of each next layer
+			layerOutput = np.matmul(i, layerOutput)
+
+			layerOutput = np.array([math.tanh(x) for x in layerOutput])
+
+		return layerOutput
+
+		'''
 		# Set first layer of netOutput to the current input
 		for i in range(self.structure[0]):
 			self.netOutput[0][i] = input[i]
@@ -139,6 +182,7 @@ class NN():
 			return self.netOutput[-1]
 		else:
 			return self.netOutput
+		'''
 
 
 	def applydEdW(self): 	# Applies gradient descent using the current self.dEdW

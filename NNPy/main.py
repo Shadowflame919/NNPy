@@ -30,6 +30,7 @@ class Main():
 		self.mode = self.modeList[self.modeNum]
 
 
+
 	def update(self):	# Starts the main update loop
 
 		dt = self.clock.tick(60)/1000
@@ -51,7 +52,7 @@ class Main():
 		self.logs.append(self.mouseState[1])
 
 
-		self.mode.update(self.mouseState)
+		self.mode.update(self.mouseState, dt)
 
 		# Update main buttons
 		for button in self.buttonList:

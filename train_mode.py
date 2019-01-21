@@ -22,8 +22,7 @@ class Train_Mode():
 			button.Button(self.screen, pygame.Rect(1050, 150, 150, 30), "Train 1x", 30, self.train_1x),
 			button.Button(self.screen, pygame.Rect(1050, 185, 150, 30), "Train 10x", 30, self.train_10x),
 			button.Button(self.screen, pygame.Rect(1050, 220, 150, 30), "Train 100x", 30, self.train_100x),
-			button.Button(self.screen, pygame.Rect(1050, 255, 150, 30), "Train 1000x", 30, self.train_1000x),
-			button.Button(self.screen, pygame.Rect(1050, 290, 150, 30), "Train: False", 30, self.toggleAutoTrain),
+			button.Button(self.screen, pygame.Rect(1050, 255, 150, 30), "Train: False", 30, self.toggleAutoTrain),
 		]
 
 		self.errorList = []
@@ -66,14 +65,26 @@ class Train_Mode():
 		]'''
 
 		self.autoTrain = False
+		self.autoTrainSpeed = 1		# Number of times to train per update cycle
+		self.autoTrainTime = 0		# Time done autotraining
 
-
-
-	def update(self, mouseState):	# Starts the main update loop
+	def update(self, mouseState, dt):	
 
 		if (self.autoTrain):
-			self.main.train()
-			#self.main.train()
+			for i in range(math.floor(self.autoTrainSpeed)):
+				self.main.train()
+
+			'''
+			# Keeps rendering at atleast 30fps
+			if (dt <= 1/30):	
+				self.autoTrainSpeed += 1/8
+			elif (self.autoTrainSpeed > 1):
+				self.autoTrainSpeed -= 1/8
+			'''
+
+			self.autoTrainTime += dt
+			
+
 
 		self.graphList[self.graphNum].update(mouseState)
 
@@ -82,6 +93,12 @@ class Train_Mode():
 	def render(self, mouseState):
 
 		self.graphList[self.graphNum].render(mouseState)
+
+		text = self.font.render("Train Speed: " + str(self.autoTrainSpeed), True, (0,0,0))
+		self.screen.blit(text, [1050,500])
+
+		text = self.font.render("Time Trained: " + str(round(self.autoTrainTime)), True, (0,0,0))
+		self.screen.blit(text, [1050,540])
 
 		#text = self.font.render("Batch Num: " + str(self.main.batchNum), True, (0,0,0))
 		#self.screen.blit(text, [1050,300])
@@ -115,11 +132,6 @@ class Train_Mode():
 		for i in range(100):
 			self.main.train()
 
-	def train_1000x(self):
-		print("Training 1000x")
-		
-		for i in range(1000):
-			self.main.train()
 
 
 	def toggleAutoTrain(self):

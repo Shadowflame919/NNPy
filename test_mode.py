@@ -1,6 +1,6 @@
 
 
-import sys, math, pygame, random, json
+import sys, math, pygame, random, json, numpy as np
 from NNPy import button, graph, nn
 
 class Test_Mode():
@@ -42,7 +42,7 @@ class Test_Mode():
 		self.testData = []
 
 
-	def update(self, mouseState):	# Starts the main update loop
+	def update(self, mouseState, dt):	
 
 		pass
 
@@ -192,15 +192,15 @@ class Test_Mode():
 		submissionString = "ImageId,Label\n"
 		for k,img in enumerate(self.testData):
 			results = self.nn.getOutput(self.testData[k])
-			answer = results.index(max(results))
+			answer = np.where(results == np.amax(results))[0][0]
 
 			submissionString += str(k+1) + "," + str(answer) + "\n"
 
-			if k % round(testDataLength/100) == 0:
+			if k % math.ceil(testDataLength/10) == 0:
 				print(str(round(100*k/testDataLength)) + "%")
 
 		submissionFile = open("submission.csv", "w")
-		submissionFile.write("ImageId,Label\n")
+		submissionFile.write(submissionString)
 		submissionFile.close()
 
 		print("Submission complete")

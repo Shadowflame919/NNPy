@@ -36,7 +36,7 @@
 
 
 
-import sys, math, random, pygame, json
+import sys, math, random, pygame, json, numpy as np
 pygame.init()
 
 import train_mode, test_mode
@@ -49,7 +49,7 @@ def setup(self):
 
 	self.trainingData = []
 	self.trainingDataNum = 0
-	self.trainingDataLength = 42000		# Train has 42000 data samples
+	self.trainingDataLength = 4200		# Train has 42000 data samples
 	
 	# Gets image data
 	print("Extracting Image Data...")
@@ -106,13 +106,13 @@ def test(self):
 	#self.mode.testOutput = ",".join([str(round(i,2)) for i in results])
 
 	# Tests from the end of the training data
-	testLength = 2000	
+	testLength = 4200
 	correct = 0
 	print("Performing test on " + str(testLength) + " items")
 	for i in range(testLength):
 		index = len(self.trainingData) - testLength + i
 		results = self.nn.getOutput(self.trainingData[index][0])
-		if results.index(max(results)) == self.trainingData[index][1].index(1):
+		if np.where(results == np.amax(results))[0][0] == self.trainingData[index][1].index(1):
 			correct += 1
 
 		if i % round(testLength/10) == 0:
@@ -135,6 +135,7 @@ engineParams = {
 	]
 }
 
+
 engine = main.Main(engineParams)
 while True:
 	engine.update()
@@ -142,3 +143,24 @@ while True:
 
 
 
+
+
+
+
+print("hi")
+
+
+x = nn.NN([2,3,4], 0.01)
+
+print(x)
+
+print(len(x.network))
+
+i = [0.1, 0.2]
+print("Output: ", x.getOutput(i))
+
+
+#a = np.matmul([[1,2,3],[1,2,3],[1,2,3]],[1,2,3])
+#print(a)
+
+input()
