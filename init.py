@@ -73,9 +73,9 @@ def setup(self):
 	print("Image Data Extracted, loaded " + str(len(self.trainingData)) + " images")
 
 	## Setup nn ##
-	self.nn = nn.NN([784,64,64,10], 0.001)
+	self.nn = nn.NN([784,64,10], 0.001)
 
-
+	print(self.nn.network[-1][-1][-1])
 
 
 def train(self):
@@ -106,22 +106,26 @@ def test(self):
 	#self.mode.testOutput = ",".join([str(round(i,2)) for i in results])
 
 	# Tests from the end of the training data
+	startTime = pygame.time.get_ticks()
+
 	testLength = 4200
 	correct = 0
 	print("Performing test on " + str(testLength) + " items")
 	for i in range(testLength):
 		index = len(self.trainingData) - testLength + i
 		results = self.nn.getOutput(self.trainingData[index][0])
-		if np.where(results == np.amax(results))[0][0] == self.trainingData[index][1].index(1):
+		if results.argmax() == self.trainingData[index][1].index(1):
 			correct += 1
 
-		if i % round(testLength/10) == 0:
+		if i % math.ceil(testLength/10) == 0:
 			print(str(round(100*i/testLength)) + "%")
 
 	accuracy = str(round(100*correct/testLength, 2))
 	print("Test complete, accuracy of " + accuracy + "%")
 	self.mode.testOutput = accuracy + "% (" + str(correct) + " / " + str(testLength) + ")"
 
+	testTime = pygame.time.get_ticks() - startTime
+	print("Test took " + str(testTime) + "ms")
 
 
 main.Main.setup = setup

@@ -74,13 +74,13 @@ class Train_Mode():
 			for i in range(math.floor(self.autoTrainSpeed)):
 				self.main.train()
 
-			'''
+			
 			# Keeps rendering at atleast 30fps
 			if (dt <= 1/30):	
-				self.autoTrainSpeed += 1/8
+				self.autoTrainSpeed += 1
 			elif (self.autoTrainSpeed > 1):
-				self.autoTrainSpeed -= 1/8
-			'''
+				self.autoTrainSpeed -= 1
+			
 
 			self.autoTrainTime += dt
 			

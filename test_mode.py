@@ -192,7 +192,7 @@ class Test_Mode():
 		submissionString = "ImageId,Label\n"
 		for k,img in enumerate(self.testData):
 			results = self.nn.getOutput(self.testData[k])
-			answer = np.where(results == np.amax(results))[0][0]
+			answer = results.argmax()
 
 			submissionString += str(k+1) + "," + str(answer) + "\n"
 

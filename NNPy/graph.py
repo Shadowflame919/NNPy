@@ -70,7 +70,7 @@ class Graph():
 			if self.rect.collidepoint(mouseState[0]):	# If mouse inside graph rect
 				# Find which data point mouse x position lines up with
 				dataIndex = round((len(self.avgData)-1) * ((mouseState[0][0] - self.rect.x) / self.rect.w))
-				pygame.draw.circle(self.screen, (0,0,255), [round(i) for i in pointList[dataIndex]], 3)
+				pygame.draw.circle(self.screen, (0,0,255), [int(i) for i in pointList[dataIndex]], 3)
 
 				text = self.font.render(str(round(self.avgData[dataIndex], 5)), True, (0,0,0))
 				textRect = text.get_rect()

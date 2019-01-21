@@ -54,10 +54,68 @@ class NN():
 			self.network.append(layer)
 
 
+		#print("Network:")
+		#for i in self.network:
+		#	print("	", i)
+
+		'''
+			Stores the output of each layer after network has run through
+			Each layer has an output for each neuron with a 1 at the end to keep the matrix multiplication correct for bias
+			Final layer does not have an extra one
+		'''
+		self.output = []
+		for l in range(len(self.structure)):
+			layer = [0.0] * self.structure[l]
+			if l<len(self.structure)-1:		# Don't add extra 1 to final layer output
+				layer = layer + [1.0]
+			layer = np.array(layer)
+			self.output.append(layer)
+
+		#print("output", self.output)
+
+
+
+
+		'''
+			Calculate dEdI for all the neurons in each layer
+			Output layer is just a 
+			dEdI has a value for each neuron in the layer, plus an extra 0 on the end for the matrix multiplication to work
+			First layer is not needed for backpropogating weights
+		'''
+		self.dEdI = []
+		for l in range(1,len(self.structure)):
+			layer = [0.0] * self.structure[l]
+			if l<len(self.structure)-1:		# Don't add extra 0 to final layer output
+				layer = layer + [0.0]
+			layer = np.array(layer)
+			self.dEdI.append(layer)
+
+		#print("dEdI", self.dEdI)
+
+
+
+
+		'''
+			Calculate dEdW for each weight in network
+			Follow exactly the same structure as self.network
+		'''
+		self.dEdW = []
+		for layer in self.network:
+			dEdWLayer = layer.copy()
+			dEdWLayer.fill(0.0)
+			self.dEdW.append(dEdWLayer)
+
+
+
+		#print(self.dEdW)
+
 
 		# Convert to numpy array (dimentions cannot be changed)
 		# This cannot be done! Each layer has a different number of neurons and thus differnet array size!! see -> numpy.array([[1,2],[3]])
 		#self.network = np.array(self.network, ndmin=3)
+
+
+
 
 		"""
 		''' 
@@ -140,13 +198,27 @@ class NN():
 
 		# Add bias 1 and set as the layerOutput for the input layer
 		layerOutput = np.array(input+[1])	
-		#print(layerOutput)
 
-		for i in self.network:
+		# Store input (first layer's output layer)
+		self.output[0] = layerOutput.copy()
+
+		for k,i in enumerate(self.network):
 			# Find the layerOutput of each next layer
 			layerOutput = np.matmul(i, layerOutput)
 
 			layerOutput = np.array([math.tanh(x) for x in layerOutput])
+
+			# Makes sure each output except the last has a 1 at the end to correctly perform matrix multiplication
+			if k != len(self.network)-1:
+				layerOutput[-1] = 1
+
+			self.output[k+1] = layerOutput
+
+			#print(layerOutput)
+
+		#print("output")
+		#for i in self.output:
+		#	print([x for x in i])
 
 		return layerOutput
 
@@ -185,27 +257,33 @@ class NN():
 		'''
 
 
-	def applydEdW(self): 	# Applies gradient descent using the current self.dEdW
-		# Applies dEdW by altering each weight through gradient descent
-		for l in range(len(self.structure)-1):
-			for n in range(self.structure[l]+1):	# bias dEdW's are needed in each layer
-				for w in range(self.structure[l+1]):
-					self.network[l][n][w] += -self.LEARNING_RATE * self.dEdW[l][n][w];
-
-	def resetdEdW(self):
-		# Final layer dEdW's do not exist (no weights in final layer)
-		for l in range(len(self.structure)-1):
-			# bias dEdW's are needed in each layer
-			for n in range(self.structure[l]+1):
-				for w in range(self.structure[l+1]):
-					self.dEdW[l][n][w] = 0
-
 	def getError(self, output, desired):	# Returns squared difference error of two arrays with equal length
 		#print("Error: ", output, desired)
 		errorSum = 0
 		for i in range(len(output)):
 			errorSum += (output[i] - desired[i])**2			
 		return errorSum
+
+
+
+	def train(self, data):
+
+		output = self.getOutput(data[0])
+		#print("output", output)
+
+		# Calculate error
+		errorSumBefore = self.getError(output, data[1])
+
+		#print(errorSumBefore)
+
+		#print(data[1], [round(i,2) for i in output], errorSumBefore)
+
+		self.findGradDescent(data[1])
+
+		self.reduceErrorWithdEdW()
+	
+		return errorSumBefore
+
 
 
 	def findGradDescent(self, desired):
@@ -231,23 +309,39 @@ class NN():
 
 
 
+
 	def findOutputdEdI(self, desired):
 		# Finds dEdI for output layer by comparing to desired output
 		# Error is the difference squared -> E=(target - desired)^2
 
+		self.dEdI[-1] = np.array([
+			 
+			2
+			* (neuronOutput - desired[i])
+			* (1 - neuronOutput**2)
+
+		for i,neuronOutput in enumerate(self.output[-1])])
+
+		#print("dEdI", self.dEdI)
+		
+		# Compare with alternative of
+		# for i in range(len(self.dEdI[-1])):
+		#	self.dEdI[-1][i] = the derivative value
+
+
 		# For each neuron in the final layer
-		for n in range(self.structure[-1]):
+		#for n in range(self.structure[-1]):
 			# E = (o-t)^2  ->  dEdO = 2(o-t)
 			# O = tanh(I)  ->  dOdI = 1 - o^2
 			# dEdI = dEdO * dOdI
 
 			# Derivative of difference squared
-			self.dEdI[-1][n] = 2 * (self.netOutput[-1][n] - desired[n]);
+		#	self.dEdI[-1][n] = 2 * (self.netOutput[-1][n] - desired[n]);
 			#self.dEdI[-1][n] = 4 * (self.netOutput[-1][n] - desired[n])**3;
 			#self.dEdI[-1][n] = 8 * (self.netOutput[-1][n] - desired[n])**7;
 			
 			# Derivative of activation function
-			self.dEdI[-1][n] *= (1 - self.netOutput[-1][n]*self.netOutput[-1][n]);
+		#	self.dEdI[-1][n] *= (1 - self.netOutput[-1][n]*self.netOutput[-1][n]);
 		
 	
 	def finddEdI(self): 	# Finds dEdI for each layer excluding first and last
@@ -255,6 +349,20 @@ class NN():
 		# Last layer is calculated another way and is assumed to already be set
 		# First layer doesn't exist as it is not needed in finding dEdW
 
+		for l in range(len(self.structure)-2, 0, -1):
+			#print("layer", l)
+			#print(self.dEdI[l].shape)
+			#print(self.network[l].shape)
+			#print("finding dEdI for", self.dEdI[l-1].shape)
+
+			np.matmul(self.dEdI[l], self.network[l], self.dEdI[l-1])
+			
+			# Set final value to zero to correct matmul
+			self.dEdI[l-1][-1] = 0
+			
+		#print("final dEdI", self.dEdI)
+
+		'''
 		# Start 2nd last layer (2nd last layer in dEdI) and work backwards to 2nd layer (1st layer in dEdI)
 		for l in range(len(self.structure)-2, 0, -1):
 			currLayerNetwork = self.network[l]
@@ -273,11 +381,29 @@ class NN():
 				dEdI *= (1 - self.netOutput[l][n]**2)
 
 				prevLayerdEdI[n] = dEdI 	# Set new dEdI value
-			
+		'''
 
 	def finddEdW(self):	# Finds dEdW based on current state of dEdI
-		# Calculations are added to each value in this.dEdW rather than set to allow for batch training
 
+		#print("Finding dEdW")
+
+		for k,layer in enumerate(self.network):
+			#print("find weights for layer", k)
+
+			#print("output shape", self.output[k].shape)
+			#print("dEdI shape", self.dEdI[k].shape)
+
+
+			np.multiply(self.output[k], self.dEdI[k][:,np.newaxis], self.dEdW[k])
+
+
+		#for i in self.dEdW:
+		#	print(i)
+
+
+
+		# Calculations are added to each value in this.dEdW rather than set to allow for batch training
+		'''
 		for l in range(len(self.structure)-1):		# No weights in last layer
 			layer = self.dEdW[l]
 			dEdILayer = self.dEdI[l]
@@ -290,25 +416,50 @@ class NN():
 
 				for w in range(self.structure[l+1]):
 					neuron[w] += netOutputNeuron * dEdILayer[w];
-			
+		'''
 		
 
-	def train(self, data):
 
-		output = self.getOutput(data[0])
+	def reduceErrorWithdEdW(self): 	# Applies gradient descent using the current self.dEdW
+		'''
+			Uses dEdW by altering each weight to decend error
+			If batch training is to apply, should also use this to reset dEdW back to all zeroes 
+			so that finddEdW can accumulate self.dEdW
 
-		# Calculate error
-		errorSumBefore = self.getError(output, data[1])
+			Should also reduce changes of weights in layers with lots of weights?
+			e.g. 
+				In [784-32-10], the dEdW of weights throughout the network are about the same.
+				This means that if each weight was altered based on their direct dEdW, 
+				the connections between 784 and 32 would reduce error considerably more than
+				the weights between 32 and 10 and would result in uneven training?
 
-		#print(data[1], [round(i,2) for i in output], errorSumBefore)
+		'''
+		
+		#print("Final layer before conversion", self.network[-1])
+		for k,layer in enumerate(self.dEdW):
+			layer *= -self.LEARNING_RATE
 
-		self.findGradDescent(data[1])
+			self.network[k] += layer
 
-		self.applydEdW()
+		#print("Final layer after conversion", self.network[-1])
 
-		self.resetdEdW()
-	
-		return errorSumBefore
+		'''
+		# Applies dEdW by altering each weight through gradient descent
+		for l in range(len(self.structure)-1):
+			for n in range(self.structure[l]+1):	# bias dEdW's are needed in each layer
+				for w in range(self.structure[l+1]):
+					self.network[l][n][w] += -self.LEARNING_RATE * self.dEdW[l][n][w];
+
+		# Final layer dEdW's do not exist (no weights in final layer)
+		for l in range(len(self.structure)-1):
+			# bias dEdW's are needed in each layer
+			for n in range(self.structure[l]+1):
+				for w in range(self.structure[l+1]):
+					self.dEdW[l][n][w] = 0
+		'''
+
+
+
 
 
 	'''

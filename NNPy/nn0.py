@@ -1,6 +1,7 @@
 
 
-import math, pygame
+import math, pygame, numpy as np
+from .other import *
 
 class NN():
 	def __init__(self, structure, LEARNING_RATE):
@@ -251,6 +252,7 @@ class NN():
 	def train(self, data):
 
 		output = self.getOutput(data[0])
+		print("output", output)
 
 		# Calculate error
 		errorSumBefore = self.getError(output, data[1])
