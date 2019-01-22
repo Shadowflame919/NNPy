@@ -100,6 +100,9 @@ class Train_Mode():
 		text = self.font.render("Time Trained: " + str(round(self.autoTrainTime)), True, (0,0,0))
 		self.screen.blit(text, [1050,540])
 
+		text = self.font.render(str(self.main.nn.structure), True, (0,0,0))
+		self.screen.blit(text, [1050,580])
+
 		#text = self.font.render("Batch Num: " + str(self.main.batchNum), True, (0,0,0))
 		#self.screen.blit(text, [1050,300])
 

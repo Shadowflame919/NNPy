@@ -40,12 +40,7 @@ import sys, math, random, pygame, json, numpy as np
 pygame.init()
 
 import train_mode, test_mode
-from NNPy import main
-
-if (input("NN 0 or 1: ") == "0"):
-	from NNPy import nn 
-else:
-	from NNPy import nnOld as nn
+from NNPy import main, nn
 
 print("Beginning Program")
 
@@ -54,7 +49,7 @@ def setup(self):
 
 	self.trainingData = []
 	self.trainingDataNum = 0
-	self.trainingDataLength = 4200		# Train has 42000 data samples
+	self.trainingDataLength = 42000		# Train has 42000 data samples
 	
 	# Gets image data
 	print("Extracting Image Data...")
@@ -78,7 +73,7 @@ def setup(self):
 	print("Image Data Extracted, loaded " + str(len(self.trainingData)) + " images")
 
 	## Setup nn ##
-	self.nn = nn.NN([784,32,10], 0.001)
+	self.nn = nn.NN([784,64,64,10], 0.001)
 
 	#print(self.nn.network[-1][-1][-1])
 
@@ -113,7 +108,7 @@ def test(self):
 	# Tests from the end of the training data
 	startTime = pygame.time.get_ticks()
 
-	testLength = 4200
+	testLength = 10000
 	correct = 0
 	print("Performing test on " + str(testLength) + " items")
 	for i in range(testLength):
