@@ -34,9 +34,9 @@ class NN():
 			self.network.append(layer)
 
 
-		print("Network:")
-		for i in self.network:
-			print("	", len(i))
+		#print("Network:")
+		#for i in self.network:
+		#	print("	", len(i))
 
 
 		''' 
@@ -173,18 +173,18 @@ class NN():
 
 	def train(self, data):
 
-		print("Starting a train")
+		#print("Starting a train")
 
 		output = self.getOutput(data[0])
-		print("output", output)
+		#print("output", output)
 
 		# Calculate error
 		errorSumBefore = self.getError(output, data[1])
 
 		#print(data[1], [round(i,2) for i in output], errorSumBefore)
 
-		print("netoutput:", self.netOutput)
-		print([len(i) for i in self.netOutput])
+		#print("netoutput:", self.netOutput)
+		#print([len(i) for i in self.netOutput])
 
 		self.findGradDescent(data[1])
 
@@ -214,7 +214,7 @@ class NN():
 		# Find dEdI for each preceding layer starting from the 2nd last and not including the first
 		self.finddEdI();
 
-		print("dEdI", self.dEdI)
+		#print("dEdI", self.dEdI)
 
 		# Finds dEdW based on dEdI and adds to current dEdW
 		self.finddEdW();
@@ -251,7 +251,7 @@ class NN():
 			currLayerdEdI = self.dEdI[l]
 			prevLayerdEdI = self.dEdI[l-1]
 
-			print(prevLayerdEdI)
+			#print(prevLayerdEdI)
 
 			for n in range(self.structure[l]):	# For each neuron in layer
 				currLayerNeuronNetwork = currLayerNetwork[n]
@@ -262,18 +262,18 @@ class NN():
 					# Each neuron in next layer has a weighted effect on dEdI based on that neurons dEdI
 					dEdI += currLayerNeuronNetwork[w] * currLayerdEdI[w]
 
-				print("dEdI before activation derivative", dEdI, (1 - self.netOutput[l][n]**2), self.netOutput[l][n], [l,n])
+				#print("dEdI before activation derivative", dEdI, (1 - self.netOutput[l][n]**2), self.netOutput[l][n], [l,n])
 
 				# Activation function derivative
 				dEdI *= (1 - self.netOutput[l][n]**2)
 
 				prevLayerdEdI[n] = dEdI 	# Set new dEdI value
 
-				print("dEdI for neuron", dEdI)
+				#print("dEdI for neuron", dEdI)
 
 
 
-		print("Made dEdI")
+		#print("Made dEdI")
 			
 
 	def finddEdW(self):	# Finds dEdW based on current state of dEdI
