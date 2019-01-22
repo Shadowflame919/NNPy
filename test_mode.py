@@ -21,6 +21,7 @@ class Test_Mode():
 
 		self.buttonList = [
 			button.Button(self.screen, pygame.Rect(750, 400, 150, 30), "Full Test", 30, self.fullTest),
+			button.Button(self.screen, pygame.Rect(750, 440, 150, 30), "Single Test", 30, self.singleTest),
 			button.Button(self.screen, pygame.Rect(750, 500, 150, 30), "Download", 30, self.downloadNetwork),
 			button.Button(self.screen, pygame.Rect(750, 540, 150, 30), "Upload", 30, self.uploadNetwork),
 			button.Button(self.screen, pygame.Rect(750, 600, 200, 30), "Create Submission", 30, self.createSubmission),
@@ -89,7 +90,9 @@ class Test_Mode():
 	def fullTest(self):
 		self.main.test();
 
-
+	def singleTest(self):
+		output = self.main.nn.getOutput(self.main.trainingData[0][0])
+		print("First digit output", output)
 
 
 	def renderDigit(self, data, rect):
@@ -129,7 +132,7 @@ class Test_Mode():
 		fileString = ""
 		fileString += json.dumps(self.nn.structure)
 		fileString += "\n" + json.dumps(self.nn.LEARNING_RATE)
-		fileString += "\n" + json.dumps(self.nn.network)
+		fileString += "\n" + json.dumps([i.tolist() for i in self.nn.network])
 
 		file.write(fileString)
 		file.close()
@@ -150,6 +153,7 @@ class Test_Mode():
 				netLearning = json.loads(k)
 			elif i==2:
 				netNetwork = json.loads(k)
+				netNetwork = [np.array(i) for i in netNetwork]
 
 		self.main.nn = nn.NN(netStructure, netLearning)
 		self.main.nn.network = netNetwork

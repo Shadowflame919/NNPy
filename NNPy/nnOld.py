@@ -3,6 +3,8 @@
 import math, pygame, numpy as np
 from .other import *
 
+print("Old nn version")
+
 class NN():
 	def __init__(self, structure, LEARNING_RATE):
 
@@ -30,6 +32,11 @@ class NN():
 					neuron.append(weight)
 				layer.append(neuron)
 			self.network.append(layer)
+
+
+		print("Network:")
+		for i in self.network:
+			print("	", len(i))
 
 
 		''' 
@@ -164,6 +171,30 @@ class NN():
 		return errorSum
 
 
+	def train(self, data):
+
+		print("Starting a train")
+
+		output = self.getOutput(data[0])
+		print("output", output)
+
+		# Calculate error
+		errorSumBefore = self.getError(output, data[1])
+
+		#print(data[1], [round(i,2) for i in output], errorSumBefore)
+
+		print("netoutput:", self.netOutput)
+		print([len(i) for i in self.netOutput])
+
+		self.findGradDescent(data[1])
+
+		self.applydEdW()
+
+		self.resetdEdW()
+	
+		return errorSumBefore
+
+
 	def findGradDescent(self, desired):
 		'''
 			Calculates the gradient of descent for a single item and adds to dEdW 
@@ -176,11 +207,14 @@ class NN():
 			Although dEdW is just dEdI * output running through it, so not much computation is saved
 		'''
 
+
 		# Find dEdI for last layer
 		self.findOutputdEdI(desired)
 
 		# Find dEdI for each preceding layer starting from the 2nd last and not including the first
 		self.finddEdI();
+
+		print("dEdI", self.dEdI)
 
 		# Finds dEdW based on dEdI and adds to current dEdW
 		self.finddEdW();
@@ -216,6 +250,9 @@ class NN():
 			currLayerNetwork = self.network[l]
 			currLayerdEdI = self.dEdI[l]
 			prevLayerdEdI = self.dEdI[l-1]
+
+			print(prevLayerdEdI)
+
 			for n in range(self.structure[l]):	# For each neuron in layer
 				currLayerNeuronNetwork = currLayerNetwork[n]
 				dEdI = 0	
@@ -225,10 +262,18 @@ class NN():
 					# Each neuron in next layer has a weighted effect on dEdI based on that neurons dEdI
 					dEdI += currLayerNeuronNetwork[w] * currLayerdEdI[w]
 
+				print("dEdI before activation derivative", dEdI, (1 - self.netOutput[l][n]**2), self.netOutput[l][n], [l,n])
+
 				# Activation function derivative
 				dEdI *= (1 - self.netOutput[l][n]**2)
 
 				prevLayerdEdI[n] = dEdI 	# Set new dEdI value
+
+				print("dEdI for neuron", dEdI)
+
+
+
+		print("Made dEdI")
 			
 
 	def finddEdW(self):	# Finds dEdW based on current state of dEdI
@@ -249,20 +294,3 @@ class NN():
 			
 		
 
-	def train(self, data):
-
-		output = self.getOutput(data[0])
-		print("output", output)
-
-		# Calculate error
-		errorSumBefore = self.getError(output, data[1])
-
-		#print(data[1], [round(i,2) for i in output], errorSumBefore)
-
-		self.findGradDescent(data[1])
-
-		self.applydEdW()
-
-		self.resetdEdW()
-	
-		return errorSumBefore

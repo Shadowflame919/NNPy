@@ -3,6 +3,8 @@
 import math, pygame, numpy as np
 from .other import *
 
+print("New nn version")
+
 class NN():
 	def __init__(self, structure, LEARNING_RATE):
 
@@ -268,13 +270,13 @@ class NN():
 
 	def train(self, data):
 
+		#print("Starting a train")
+
 		output = self.getOutput(data[0])
 		#print("output", output)
 
 		# Calculate error
 		errorSumBefore = self.getError(output, data[1])
-
-		#print(errorSumBefore)
 
 		#print(data[1], [round(i,2) for i in output], errorSumBefore)
 
@@ -298,11 +300,14 @@ class NN():
 			Although dEdW is just dEdI * output running through it, so not much computation is saved
 		'''
 
+
 		# Find dEdI for last layer
 		self.findOutputdEdI(desired)
 
 		# Find dEdI for each preceding layer starting from the 2nd last and not including the first
 		self.finddEdI();
+
+		#print("dEdI", self.dEdI)
 
 		# Finds dEdW based on dEdI and adds to current dEdW
 		self.finddEdW();
@@ -316,9 +321,7 @@ class NN():
 
 		self.dEdI[-1] = np.array([
 			 
-			2
-			* (neuronOutput - desired[i])
-			* (1 - neuronOutput**2)
+			2 * (neuronOutput - desired[i]) * (1 - neuronOutput**2)
 
 		for i,neuronOutput in enumerate(self.output[-1])])
 
@@ -356,6 +359,10 @@ class NN():
 			#print("finding dEdI for", self.dEdI[l-1].shape)
 
 			np.matmul(self.dEdI[l], self.network[l], self.dEdI[l-1])
+
+			# Multiply by activation derivative
+			for k,i in enumerate(self.output[l]):
+				self.dEdI[l-1][k] *= (1-i**2)
 			
 			# Set final value to zero to correct matmul
 			self.dEdI[l-1][-1] = 0
@@ -440,6 +447,7 @@ class NN():
 			layer *= -self.LEARNING_RATE
 
 			self.network[k] += layer
+
 
 		#print("Final layer after conversion", self.network[-1])
 
