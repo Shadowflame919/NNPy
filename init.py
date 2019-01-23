@@ -56,26 +56,30 @@ def setup(self):
 	for k,item in enumerate(open("train.csv")):
 		if k==0: continue
 		elif k<=self.trainingDataLength:
-			imageData = [int(x) for x in item.split(",")]	# Row of for that image
-			imageType = [-1]*10	
+			imageData = [int(x) for x in item.split(",")]	# Row of data for that image
+
+			# Extract digit type
+			imageType = np.array([-1]*10)	
 			imageType[imageData.pop(0)] = 1
 
 			# Normalise image data from 0-255 to -1 to 1
-			imageData = [2*(x/255)-1 for x in imageData]
+			imageData = np.array([2*(x/255)-1 for x in imageData])
 
+			# Add image to training data
 			self.trainingData.append([imageData,imageType])
 
 			if (k % round(self.trainingDataLength/10) == 0):
 				print(str(round(100*k/self.trainingDataLength)) + "%")
 
-		else:
-			break
+		else: break
+
 	print("Image Data Extracted, loaded " + str(len(self.trainingData)) + " images")
 
 	## Setup nn ##
-	self.nn = nn.NN([784,64,64,10], 0.001)
+	self.nn = nn.NN([784,128,64,10], 0.001)
 
-	#print(self.nn.network[-1][-1][-1])
+	#print(self.nn)
+
 
 
 def train(self):
@@ -98,7 +102,6 @@ def train(self):
 
 
 
-
 def test(self):
 	
 	#trainingData = self.trainingData[0]
@@ -114,7 +117,7 @@ def test(self):
 	for i in range(testLength):
 		index = len(self.trainingData) - testLength + i
 		results = self.nn.getOutput(self.trainingData[index][0])
-		if results.argmax() == self.trainingData[index][1].index(1):
+		if results.argmax() == self.trainingData[index][1].argmax():
 			correct += 1
 
 		if i % math.ceil(testLength/10) == 0:
@@ -126,6 +129,9 @@ def test(self):
 
 	testTime = pygame.time.get_ticks() - startTime
 	print("Test took " + str(testTime) + "ms")
+
+
+
 
 
 main.Main.setup = setup
@@ -146,25 +152,3 @@ while True:
 	engine.render()
 
 
-
-
-
-
-
-print("hi")
-
-
-x = nn.NN([2,3,4], 0.01)
-
-print(x)
-
-print(len(x.network))
-
-i = [0.1, 0.2]
-print("Output: ", x.getOutput(i))
-
-
-#a = np.matmul([[1,2,3],[1,2,3],[1,2,3]],[1,2,3])
-#print(a)
-
-input()

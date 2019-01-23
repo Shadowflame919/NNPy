@@ -177,11 +177,11 @@ class Test_Mode():
 					imageData = [int(x) for x in item.split(",")]	# Row of for that image
 
 					# Normalise pixel data from 0-255 to -1 to 1
-					imageData = [2*(x/255)-1 for x in imageData]
+					imageData = np.array([2*(x/255)-1 for x in imageData])
 
 					self.testData.append(imageData)
 
-					if (k % round(testDataLength/10) == 0):
+					if (k % math.ceil(testDataLength/10) == 0):
 						print(str(round(100*k/testDataLength)) + "%")
 
 			print("Image Data Extracted, loaded " + str(len(self.testData)) + " images")
@@ -208,21 +208,3 @@ class Test_Mode():
 		submissionFile.close()
 
 		print("Submission complete")
-
-		# Perform test
-		'''print("Performing test")
-		submissionFile = open("submission.csv", "a")
-		submissionFile.write("ImageId,Label\n")
-		for k,img in enumerate(self.testData):
-			results = self.nn.getOutput(self.testData[k])
-
-			answer = results.index(max(results))
-
-			submissionFile.write(str(k+1) + "," + str(answer) + "\n")
-
-			if k % round(testDataLength/100) == 0:
-				print(str(round(100*k/testDataLength)) + "%")
-		submissionFile.close()
-
-		print("Submission complete")'''
-

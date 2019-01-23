@@ -68,6 +68,7 @@ class Train_Mode():
 		self.autoTrainSpeed = 1		# Number of times to train per update cycle
 		self.autoTrainTime = 0		# Time done autotraining
 
+
 	def update(self, mouseState, dt):	
 
 		if (self.autoTrain):
@@ -85,9 +86,7 @@ class Train_Mode():
 			self.autoTrainTime += dt
 			
 
-
 		self.graphList[self.graphNum].update(mouseState)
-
 
 
 	def render(self, mouseState):
@@ -125,13 +124,11 @@ class Train_Mode():
 
 	def train_10x(self):
 		print("Training 10x")
-		
 		for i in range(10):
 			self.main.train()
 
 	def train_100x(self):
 		print("Training 100x")
-		
 		for i in range(100):
 			self.main.train()
 
