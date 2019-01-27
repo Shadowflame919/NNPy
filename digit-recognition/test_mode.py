@@ -1,7 +1,7 @@
 
 
-import sys, math, pygame, random, json, numpy as np
-from NNPy import button, graph, nn
+import sys, math, pygame, random, numpy as np
+from NNPy import button, graph, image_renderer, nn
 
 class Test_Mode():
 	def __init__(self, main):
@@ -18,27 +18,20 @@ class Test_Mode():
 		#textrect.centery = screen.get_rect().centery
 
 
-
 		self.buttonList = [
 			button.Button(self.screen, pygame.Rect(750, 400, 150, 30), "Full Test", 30, self.fullTest),
 			button.Button(self.screen, pygame.Rect(750, 440, 150, 30), "Single Test", 30, self.singleTest),
-			button.Button(self.screen, pygame.Rect(750, 500, 150, 30), "Download", 30, self.downloadNetwork),
-			button.Button(self.screen, pygame.Rect(750, 540, 150, 30), "Upload", 30, self.uploadNetwork),
+			button.Button(self.screen, pygame.Rect(750, 500, 150, 30), "Download", 30, self.main.downloadNetwork),
+			button.Button(self.screen, pygame.Rect(750, 540, 150, 30), "Upload", 30, self.main.uploadNetwork),
 			button.Button(self.screen, pygame.Rect(750, 600, 200, 30), "Create Submission", 30, self.createSubmission),
 			#button.Button(self.screen, pygame.Rect(720, 100, 30, 30), ">", 40, self.button_0),
 			#button.Button(self.screen, pygame.Rect(685, 100, 30, 30), "<", 40, self.button_1),
 			#button.Button(self.screen, pygame.Rect(685, 250, 100, 30), "Output", 30, self.getDigitOutput)
 		]
 
-		self.digitNum = 0
-		self.digitData = None
-		self.digitOutput = None
 
-
-		# used to render
+		# Used to store test results
 		self.testOutput = ""
-
-
 
 		self.testData = []
 
@@ -62,30 +55,6 @@ class Test_Mode():
 		text = self.font.render("Results: " + self.testOutput, True, (0,0,0))
 		self.screen.blit(text, [760,155])
 
-		'''
-		# Render digit
-		self.renderDigit(self.digitData[0], pygame.Rect(100,100,500,500))
-
-
-		text = self.font.render("Digit No." + str(self.digitNum), True, (0,0,0))
-		self.screen.blit(text, [760,105])
-
-		text = self.font.render("Digit Value: " + str(self.digitData[1]), True, (0,0,0))
-		self.screen.blit(text, [685,150])
-
-		# Render digit output
-		if self.digitOutput != None:
-			for k,i in enumerate(self.digitOutput):
-				text = self.font.render(str(k) + ": " + str(i), True, (0,0,0))
-				self.screen.blit(text, [685,290 + k*25])
-
-			# Render what network thinks
-			text = self.font.render(
-				str(self.digitOutput.index(max(self.digitOutput))) + " : " + str(round(100*max(self.digitOutput),3)) + "%",
-				True, (0,0,0))
-			self.screen.blit(text, [800,255])
-		'''
-		
 
 	def fullTest(self):
 		self.main.test();
@@ -94,72 +63,6 @@ class Test_Mode():
 		output = self.main.nn.getOutput(self.main.trainingData[0][0])
 		print("First digit output", output)
 
-
-	def renderDigit(self, data, rect):
-		pygame.draw.rect(self.screen, (230,230,230), rect)
-		pygame.draw.rect(self.screen, (0,0,0), rect, 3)
-
-		pixelRect = pygame.Rect(0, 0, math.ceil(rect.w/28), math.ceil(rect.h/28))
-		for x in range(28):
-			for y in range(28):
-				pixelRect.topleft = (rect.x + math.ceil(x*(rect.w/28)), rect.y + math.ceil(y*(rect.h/28)))
-				pixelColour = [int(data[y*28+x]*255)]*3
-
-				pygame.draw.rect(self.screen, pixelColour, pixelRect)
-
-	def getDigitOutput(self):	# Gets the output for the current testing digit
-		self.digitOutput = self.nn.getOutput(self.digitData[0])
-
-
-	def button_0(self):
-		self.digitNum += 1
-		self.digitData = None
-		self.digitOutput = None
-		if self.digitNum == sum([len(x) for x in self.batchList]):
-			self.digitNum = 0
-
-	def button_1(self):
-		if self.digitNum > 0:
-			self.digitNum -= 1
-			self.digitData = None
-			self.digitOutput = None
-
-	def downloadNetwork(self):
-		print("Downloading Network")
-		fileName = input("File Name: ")
-		file = open(fileName, "w")
-
-		fileString = ""
-		fileString += json.dumps(self.nn.structure)
-		fileString += "\n" + json.dumps(self.nn.LEARNING_RATE)
-		fileString += "\n" + json.dumps([i.tolist() for i in self.nn.network])
-
-		file.write(fileString)
-		file.close()
-
-		print("Network saved to " + fileName)
-
-	def uploadNetwork(self):
-		print("Uploading Network")
-		fileName = input("File Name: ")
-		
-		netStructure = []
-		netLearning = 0
-		netNetwork = []
-		for i,k in enumerate(open(fileName, "r")):
-			if i==0:
-				netStructure = json.loads(k)
-			elif i==1:
-				netLearning = json.loads(k)
-			elif i==2:
-				netNetwork = json.loads(k)
-				netNetwork = [np.array(i) for i in netNetwork]
-
-		self.main.nn = nn.NN(netStructure, netLearning)
-		self.main.nn.network = netNetwork
-		self.nn = self.main.nn
-
-		print("Network uploaded from " + fileName)
 
 
 
@@ -195,7 +98,7 @@ class Test_Mode():
 		print("Performing test")
 		submissionString = "ImageId,Label\n"
 		for k,img in enumerate(self.testData):
-			results = self.nn.getOutput(self.testData[k])
+			results = self.main.nn.getOutput(self.testData[k])
 			answer = results.argmax()
 
 			submissionString += str(k+1) + "," + str(answer) + "\n"

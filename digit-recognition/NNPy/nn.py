@@ -1,6 +1,6 @@
 
 
-import math, pygame, numpy as np
+import math, random, pygame, numpy as np
 
 class NN():
 	def __init__(self, structure, LEARNING_RATE):

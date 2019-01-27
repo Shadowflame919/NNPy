@@ -1,7 +1,8 @@
 
 
-import sys, math, pygame, random
+import sys, math, json, random, pygame, numpy as np
 from .button import Button
+from .nn import NN, randFloat
 
 class Main():
 	def __init__(self, params):
@@ -93,18 +94,46 @@ class Main():
 			self.screen.blit(text, [10,10+k*20])
 
 
-	def trainSum(self, n):		# Trains nn to perform sum of two floats
-		batch = []
-		for i in range(n):
-			a = 1+random.random()
-			b = 1+random.random()
-			c = a+b
-			batch.append([[a,b], [c]])
-		newError = self.nn.train(batch)[0]
-		self.errorList.append(newError)
-
 	def switch_mode(self):
 		self.modeNum += 1
 		if self.modeNum == len(self.modeList):
 			self.modeNum = 0
 		self.mode = self.modeList[self.modeNum]
+
+
+
+	def downloadNetwork(self):
+		print("Downloading Network")
+		fileName = input("File Name: ")
+		file = open(fileName, "w")
+
+		fileString = ""
+		fileString += json.dumps(self.nn.structure)
+		fileString += "\n" + json.dumps(self.nn.LEARNING_RATE)
+		fileString += "\n" + json.dumps([i.tolist() for i in self.nn.network])
+
+		file.write(fileString)
+		file.close()
+
+		print("Network saved to " + fileName)
+
+	def uploadNetwork(self):
+		print("Uploading Network")
+		fileName = input("File Name: ")
+		
+		netStructure = []
+		netLearning = 0
+		netNetwork = []
+		for i,k in enumerate(open(fileName, "r")):
+			if i==0:
+				netStructure = json.loads(k)
+			elif i==1:
+				netLearning = json.loads(k)
+			elif i==2:
+				netNetwork = json.loads(k)
+				netNetwork = [np.array(i) for i in netNetwork]
+
+		self.nn = NN(netStructure, netLearning)
+		self.nn.network = netNetwork
+
+		print("Network uploaded from " + fileName)
