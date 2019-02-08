@@ -10,7 +10,7 @@ class NN():
 		self.MAX_STARTING_WEIGHT = 0.1
 		self.MIN_STARTING_WEIGHT = -0.1
 
-		self.structure = structure
+		self.structure = np.array(structure)
 
 
 		'''
@@ -303,6 +303,33 @@ class NN():
 
 
 		#print("Final layer after conversion", self.network[-1])
+
+
+
+
+	def getOutputStartingFromLayer(self, networkInput, layerNum):	
+		# Gets the output of the network where the input was inserted into a hidden layer and fed through til the end,
+		# rather than starting from the input layer of the network.
+
+		# Append a bias [1] to end of input array and set as the layerOutput for the input layer
+		layerOutput = np.append(networkInput, 1)	
+		self.output[layerNum] = layerOutput
+
+		for k,i in enumerate(self.network):
+			if (k < layerNum): continue
+
+			# Find the layerOutput of each next layer
+			layerOutput = np.matmul(i, layerOutput)
+
+			layerOutput = np.array([math.tanh(x) for x in layerOutput])
+
+			# Makes sure each output except the last has a 1 at the end to correctly perform matrix multiplication
+			if k != len(self.network)-1:
+				layerOutput[-1] = 1
+
+			self.output[k+1] = layerOutput
+
+		return layerOutput
 
 
 

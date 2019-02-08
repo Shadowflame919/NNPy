@@ -21,13 +21,9 @@ class Graph():
 		self.oldLength = len(self.data)
 
 		# Initialise min/max values for the graph to render with
-		self.minValue = minValue
-		self.maxValue = maxValue
-		for i in self.data:
-			if i>self.maxValue:
-				self.maxValue = i
-			elif i<self.minValue:
-				self.minValue = i
+		self.minValue = 0
+		self.maxValue = 0
+		self.resetMaxData()
 
 		self.scale = 0
 
@@ -47,11 +43,6 @@ class Graph():
 		if self.oldLength < len(self.data):
 			self.oldLength = len(self.data)
 			self.updateAvgData()
-			for i in self.avgData:
-				if i>self.maxValue:
-					self.maxValue = i
-				elif i<self.minValue:
-					self.minValue = i
 
 
 	def render(self, mouseState):
@@ -124,6 +115,8 @@ class Graph():
 
 			self.avgData.append(avgSum)
 
+		self.resetMaxData()
+
 	def updateAvgData(self):	# Appends to avgData to account for new data
 		# Only calculate next average if enough items have been added
 		while len(self.avgData)*(10**self.scale) < len(self.data) - len(self.data)%(10**self.scale):
@@ -134,3 +127,13 @@ class Graph():
 				avgSum += self.data[startIndex + k]
 			avgSum /= 10**self.scale
 			self.avgData.append(avgSum)
+
+		self.resetMaxData()
+
+	def resetMaxData(self):
+		self.maxValue = 0
+		for i in self.avgData:
+			if i>self.maxValue:
+				self.maxValue = i
+			elif i<self.minValue:
+				self.minValue = i

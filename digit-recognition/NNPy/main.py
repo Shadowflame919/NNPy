@@ -14,7 +14,7 @@ class Main():
 		self.font_log = pygame.font.SysFont(None, 24)
 		#textrect.centerx = screen.get_rect().centerx
 
-		self.mouseState = [(0,0), False]	
+		self.mouseState = [(0,0), False, False, (0,0)]	
 		self.buttonList = [
 			Button(self.screen, pygame.Rect(1120, 20, 140, 30), "Mode Switch", 28, self.switch_mode)
 		]
@@ -39,8 +39,13 @@ class Main():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT: 
 				sys.exit()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				self.mouseState[2] = True
+				self.mouseState[3] = pygame.mouse.get_pos()
 			if event.type == pygame.MOUSEBUTTONUP:
 				self.mouseState[1] = True
+				self.mouseState[2] = False
+				self.mouseState[3] = (0,0)
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_q:
 					print(self.nn)

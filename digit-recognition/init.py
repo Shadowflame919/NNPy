@@ -49,7 +49,7 @@ def setup(self):
 
 	self.trainingData = []
 	self.trainingDataNum = 0
-	self.trainingDataLength = 42000		# Train has 42000 data samples
+	self.trainingDataLength = 4200		# Train has 42000 data samples
 	
 	# Gets image data
 	print("Extracting Image Data...")
@@ -111,7 +111,7 @@ def test(self):
 	# Tests from the end of the training data
 	startTime = pygame.time.get_ticks()
 
-	testLength = 10000
+	testLength = 1000
 	correct = 0
 	print("Performing test on " + str(testLength) + " items")
 	for i in range(testLength):

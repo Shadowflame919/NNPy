@@ -1,7 +1,8 @@
 
 
 import sys, math, pygame, random, numpy as np
-from NNPy import button, graph, image_renderer, nn
+from NNPy import *
+from NNPy import image_renderer
 
 class Test_Mode():
 	def __init__(self, main):
@@ -19,13 +20,15 @@ class Test_Mode():
 
 
 		self.buttonList = [
-			button.Button(self.screen, pygame.Rect(750, 400, 150, 30), "Full Test", 30, self.fullTest),
-			button.Button(self.screen, pygame.Rect(750, 440, 150, 30), "Single Test", 30, self.singleTest),
-			button.Button(self.screen, pygame.Rect(750, 500, 150, 30), "Download", 30, self.main.downloadNetwork),
-			button.Button(self.screen, pygame.Rect(750, 540, 150, 30), "Upload", 30, self.main.uploadNetwork),
-			button.Button(self.screen, pygame.Rect(750, 600, 200, 30), "Create Submission", 30, self.createSubmission),
-			#button.Button(self.screen, pygame.Rect(720, 100, 30, 30), ">", 40, self.button_0),
-			#button.Button(self.screen, pygame.Rect(685, 100, 30, 30), "<", 40, self.button_1),
+			button.Button(self.screen, pygame.Rect(650, 400, 150, 30), "Full Test", 30, self.fullTest),
+			button.Button(self.screen, pygame.Rect(650, 440, 150, 30), "Single Test", 30, self.singleTest),
+			button.Button(self.screen, pygame.Rect(650, 500, 150, 30), "Download", 30, self.main.downloadNetwork),
+			button.Button(self.screen, pygame.Rect(650, 540, 150, 30), "Upload", 30, self.main.uploadNetwork),
+			button.Button(self.screen, pygame.Rect(650, 600, 200, 30), "Create Submission", 30, self.createSubmission),
+
+			button.Button(self.screen, pygame.Rect(100, 610, 30, 30), "<", 40, self.prevImage),
+			button.Button(self.screen, pygame.Rect(135, 610, 30, 30), ">", 40, self.nextImage),
+
 			#button.Button(self.screen, pygame.Rect(685, 250, 100, 30), "Output", 30, self.getDigitOutput)
 		]
 
@@ -35,10 +38,14 @@ class Test_Mode():
 
 		self.testData = []
 
+		self.imageRenderer = image_renderer.Image_Renderer(self.screen, pygame.Rect(100,100,500,500))
+		self.renderImageNum = 0
+
 
 	def update(self, mouseState, dt):	
 
-		pass
+		if len(self.imageRenderer.imageData) == 0:
+			self.imageRenderer.setImageData(self.main.trainingData[self.renderImageNum][0])
 
 		#if self.digitData == None:
 		#	batchNum = math.floor(self.digitNum/len(self.batchList[0]))
@@ -49,21 +56,36 @@ class Test_Mode():
 
 	def render(self, mouseState):
 
+		self.imageRenderer.render()
+
+		text = self.font.render("Image Num: " + str(self.renderImageNum), True, (0,0,0))
+		self.screen.blit(text, [175,615])
+
 		text = self.font.render("TESTING MODE :)", True, (0,0,0))
-		self.screen.blit(text, [760,105])
+		self.screen.blit(text, [660,105])
 
 		text = self.font.render("Results: " + self.testOutput, True, (0,0,0))
-		self.screen.blit(text, [760,155])
+		self.screen.blit(text, [660,155])
+
+		text = self.font.render("Training Data Length: " + str(len(self.main.trainingData)), True, (0,0,0))
+		self.screen.blit(text, [660,205])
+
 
 
 	def fullTest(self):
 		self.main.test();
 
 	def singleTest(self):
-		output = self.main.nn.getOutput(self.main.trainingData[0][0])
-		print("First digit output", output)
+		output = self.main.nn.getOutput(self.main.trainingData[self.renderImageNum][0])
+		self.testOutput = ",".join([str(round(i,2)) for i in output])
 
+	def prevImage(self):
+		self.renderImageNum = (self.renderImageNum-1) % len(self.main.trainingData)
+		self.imageRenderer.setImageData(self.main.trainingData[self.renderImageNum][0])
 
+	def nextImage(self):
+		self.renderImageNum = (self.renderImageNum+1) % len(self.main.trainingData)
+		self.imageRenderer.setImageData(self.main.trainingData[self.renderImageNum][0])
 
 
 	def createSubmission(self):
@@ -111,3 +133,5 @@ class Test_Mode():
 		submissionFile.close()
 
 		print("Submission complete")
+
+
