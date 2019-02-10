@@ -37,14 +37,13 @@
 
 
 import sys, math, random, pygame, json, numpy as np
-pygame.init()
-
+import NNPy
 import train_mode, test_mode
-from NNPy import main, nn
+pygame.init()
 
 print("Beginning Program")
 
-def setup(self):
+def init(self):
 	print("Running Setup")
 
 	self.trainingData = []
@@ -76,9 +75,15 @@ def setup(self):
 	print("Image Data Extracted, loaded " + str(len(self.trainingData)) + " images")
 
 	## Setup nn ##
-	self.nn = nn.NN([784,256,128,64,10], 0.001)
+	self.nn = NNPy.NN([784,256,128,64,10], 0.001)
 
 	#print(self.nn)
+
+
+	# Create and initialise the modes
+	self.modeList = [mode(self) for mode in mainParams["modeList"]]
+	self.modeNum = 0
+	self.mode = self.modeList[self.modeNum]
 
 
 
@@ -134,21 +139,21 @@ def test(self):
 
 
 
-main.Main.setup = setup
-main.Main.train = train
-main.Main.test = test
 
-engineParams = {
+NNPy.Main.init = init
+NNPy.Main.train = train
+NNPy.Main.test = test
+
+mainParams = {
 	"modeList": [
 		train_mode.Train_Mode,
 		test_mode.Test_Mode
 	]
 }
 
-
-engine = main.Main(engineParams)
+NNPy.main = NNPy.Main(mainParams)
+NNPy.main.init()
 while True:
-	engine.update()
-	engine.render()
-
+	NNPy.main.update()
+	NNPy.main.render()
 

@@ -1,16 +1,11 @@
 
-
 import sys, math, pygame, random, numpy as np
-from NNPy import button, graph, image_renderer, nn, slider
+import NNPy
+
 
 class Test_Mode():
 	def __init__(self, main):
 		self.mode = "test"
-
-		self.main = main
-		self.screen = main.screen
-		self.nn = main.nn
-		#self.batchList = main.batchList
 
 		self.font = pygame.font.SysFont(None, 30)
 		#textrect = text.get_rect()
@@ -18,29 +13,29 @@ class Test_Mode():
 		#textrect.centery = screen.get_rect().centery
 
 		self.testImage = 0
-		self.imageRendererInput = image_renderer.Image_Renderer(self.screen, pygame.Rect(50,100,280,280))
-		self.imageRendererOutput = image_renderer.Image_Renderer(self.screen, pygame.Rect(50,400,280,280))
+		self.imageRendererInput = NNPy.Image_Renderer(NNPy.main.screen, pygame.Rect(50,100,280,280))
+		self.imageRendererOutput = NNPy.Image_Renderer(NNPy.main.screen, pygame.Rect(50,400,280,280))
 
 		# The image renderer used for tweaking the sliders manually
-		self.imageRendererCustom = image_renderer.Image_Renderer(self.screen, pygame.Rect(900,100,280,280))
+		self.imageRendererCustom = NNPy.Image_Renderer(NNPy.main.screen, pygame.Rect(900,100,280,280))
 
 		self.buttonList = [
-			button.Button(self.screen, pygame.Rect(780, 20, 150, 30), "Download", 30, self.main.downloadNetwork),
-			button.Button(self.screen, pygame.Rect(950, 20, 150, 30), "Upload", 30, self.main.uploadNetwork),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(780, 20, 150, 30), "Download", 30, NNPy.main.downloadNetwork),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 20, 150, 30), "Upload", 30, NNPy.main.uploadNetwork),
 
-			button.Button(self.screen, pygame.Rect(350, 110, 30, 30), "<", 40, self.prevTestImage),
-			button.Button(self.screen, pygame.Rect(385, 110, 30, 30), ">", 40, self.nextTestImage),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(350, 110, 30, 30), "<", 40, self.prevTestImage),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(385, 110, 30, 30), ">", 40, self.nextTestImage),
 
-			button.Button(self.screen, pygame.Rect(730, 100, 150, 30), "Use Image", 30, self.useImage),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(730, 100, 150, 30), "Use Image", 30, self.useImage),
 
-			#button.Button(self.screen, pygame.Rect(685, 250, 100, 30), "Output", 30, self.getDigitOutput)
+			#NNPy.Button(self.screen, pygame.Rect(685, 250, 100, 30), "Output", 30, self.getDigitOutput)
 		]
 
 
 		
 
 		# Add a bunch of sliders that alter the compressed tensor
-		self.sliderCount = min(self.main.nn.structure)
+		self.sliderCount = min(NNPy.main.nn.structure)
 		self.sliderList = []
 		self.compressedInput = np.array([0.0]*self.sliderCount)
 		for i in range(self.sliderCount):
@@ -56,7 +51,7 @@ class Test_Mode():
 				self.compressedInput[index] = 2*x-1
 
 
-			newSlider = slider.Slider(self.screen, sliderRect, sliderFunction)
+			newSlider = NNPy.Slider(NNPy.main.screen, sliderRect, sliderFunction)
 			self.sliderList.append(newSlider)
 
 
@@ -71,13 +66,13 @@ class Test_Mode():
 			slider.update(mouseState)
 
 		# Show the networks ability to recreate input with training data
-		imageInput = self.main.trainingData[self.testImage]
-		imageOutput = self.main.nn.getOutput(imageInput)
+		imageInput = NNPy.main.trainingData[self.testImage]
+		imageOutput = NNPy.main.nn.getOutput(imageInput)
 		self.imageRendererInput.setImageData(imageInput)
 		self.imageRendererOutput.setImageData(imageOutput)
 
 		# 
-		sliderImage = self.main.nn.getOutputStartingFromLayer(self.compressedInput, self.main.nn.structure.argmin())
+		sliderImage = NNPy.main.nn.getOutputStartingFromLayer(self.compressedInput, NNPy.main.nn.structure.argmin())
 		self.imageRendererCustom.setImageData(sliderImage)
 
 	def render(self, mouseState):
@@ -100,17 +95,17 @@ class Test_Mode():
 
 	def nextTestImage(self):
 		self.testImage += 1
-		self.testImage %= self.main.trainingDataLength
+		self.testImage %= NNPy.main.trainingDataLength
 
 	def prevTestImage(self):
 		self.testImage -= 1
-		self.testImage %= self.main.trainingDataLength
+		self.testImage %= NNPy.main.trainingDataLength
 
 
 	def useImage(self):
 		# Uses the image currently viewing in the training data as the compressed tensor
-		self.main.nn.getOutput(self.main.trainingData[self.testImage])
-		compressedTensor = self.main.nn.output[self.main.nn.structure.argmin()].copy()
+		NNPy.main.nn.getOutput(NNPy.main.trainingData[self.testImage])
+		compressedTensor = NNPy.main.nn.output[NNPy.main.nn.structure.argmin()].copy()
 
 		for i in range(self.sliderCount):
 			self.compressedInput[i] = compressedTensor[i]

@@ -1,6 +1,7 @@
 
 
 import math, random, pygame, numpy as np
+from .other import *
 
 class NN():
 	def __init__(self, structure, LEARNING_RATE):
@@ -331,9 +332,3 @@ class NN():
 
 		return layerOutput
 
-
-
-
-def randFloat(min, max):
-	#return 0.1
-	return random.random()*(max-min) + min

@@ -1,28 +1,21 @@
 
+import sys, math, pygame, random, numpy as np
+import NNPy
 
-import sys, math, pygame, random
-from NNPy import button, graph
 
 class Train_Mode():
 	def __init__(self, main):
 		self.mode = "train"
 
-		self.main = main
-		self.screen = main.screen
-		self.nn = main.nn
-		#self.batchList = main.batchList
-
 		self.font = pygame.font.SysFont(None, 30)
 
-
-
 		self.buttonList = [
-			button.Button(self.screen, pygame.Rect(535, 90, 30, 30), ">", 40, self.change_graph_next),
-			button.Button(self.screen, pygame.Rect(500, 90, 30, 30), "<", 40, self.change_graph_back),
-			button.Button(self.screen, pygame.Rect(1050, 150, 150, 30), "Train 1x", 30, self.train_1x),
-			button.Button(self.screen, pygame.Rect(1050, 185, 150, 30), "Train 10x", 30, self.train_10x),
-			button.Button(self.screen, pygame.Rect(1050, 220, 150, 30), "Train 100x", 30, self.train_100x),
-			button.Button(self.screen, pygame.Rect(1050, 255, 150, 30), "Train: False", 30, self.toggleAutoTrain),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(535, 90, 30, 30), ">", 40, self.change_graph_next),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(500, 90, 30, 30), "<", 40, self.change_graph_back),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(1050, 150, 150, 30), "Train 1x", 30, self.train_1x),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(1050, 185, 150, 30), "Train 10x", 30, self.train_10x),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(1050, 220, 150, 30), "Train 100x", 30, self.train_100x),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(1050, 255, 150, 30), "Train: False", 30, self.toggleAutoTrain),
 		]
 
 		self.errorList = []
@@ -34,19 +27,11 @@ class Train_Mode():
 		self.graphNum = 0
 		self.graphRect = pygame.Rect(50,130,960,540)
 		self.graphList = [
-			graph.Graph(
-				self.screen, 
+			NNPy.Graph(
+				NNPy.main.screen, 
 				self.graphRect,
 				"Error before training",
 				self.errorList
-			),
-			graph.Graph(
-				self.screen, 
-				self.graphRect, 
-				"Point Map",
-				self.pointMap,
-				-1,
-				1
 			)
 		]
 
@@ -59,7 +44,7 @@ class Train_Mode():
 
 		if (self.autoTrain):
 			for i in range(math.floor(self.autoTrainSpeed)):
-				self.main.train()
+				NNPy.main.train()
 
 			# Keeps rendering at atleast 30fps
 			if (dt <= 1/30):	
@@ -77,16 +62,16 @@ class Train_Mode():
 		self.graphList[self.graphNum].render(mouseState)
 
 		text = self.font.render("Train Speed: " + str(self.autoTrainSpeed), True, (0,0,0))
-		self.screen.blit(text, [1050,500])
+		NNPy.main.screen.blit(text, [1050,500])
 
 		text = self.font.render("Time Trained: " + str(round(self.autoTrainTime)), True, (0,0,0))
-		self.screen.blit(text, [1050,540])
+		NNPy.main.screen.blit(text, [1050,540])
 
-		text = self.font.render(str(self.main.nn.structure), True, (0,0,0))
-		self.screen.blit(text, [1050,580])
+		text = self.font.render(str(NNPy.main.nn.structure), True, (0,0,0))
+		NNPy.main.screen.blit(text, [1050,580])
 
-		text = self.font.render(str(self.main.nn.LEARNING_RATE), True, (0,0,0))
-		self.screen.blit(text, [1050,620])
+		text = self.font.render(str(NNPy.main.nn.LEARNING_RATE), True, (0,0,0))
+		NNPy.main.screen.blit(text, [1050,620])
 
 
 		
@@ -105,17 +90,17 @@ class Train_Mode():
 
 	def train_1x(self):
 		print("Training Once")
-		self.main.train()
+		NNPy.main.train()
 
 	def train_10x(self):
 		print("Training 10x")
 		for i in range(10):
-			self.main.train()
+			NNPy.main.train()
 
 	def train_100x(self):
 		print("Training 100x")
 		for i in range(100):
-			self.main.train()
+			NNPy.main.train()
 
 	def toggleAutoTrain(self):
 		self.autoTrain = not self.autoTrain

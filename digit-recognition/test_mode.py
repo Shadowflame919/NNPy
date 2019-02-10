@@ -1,8 +1,7 @@
 
 
 import sys, math, pygame, random, numpy as np
-from NNPy import *
-from NNPy import image_renderer
+import NNPy
 
 class Test_Mode():
 	def __init__(self, main):
@@ -20,14 +19,14 @@ class Test_Mode():
 
 
 		self.buttonList = [
-			button.Button(self.screen, pygame.Rect(650, 400, 150, 30), "Full Test", 30, self.fullTest),
-			button.Button(self.screen, pygame.Rect(650, 440, 150, 30), "Single Test", 30, self.singleTest),
-			button.Button(self.screen, pygame.Rect(650, 500, 150, 30), "Download", 30, self.main.downloadNetwork),
-			button.Button(self.screen, pygame.Rect(650, 540, 150, 30), "Upload", 30, self.main.uploadNetwork),
-			button.Button(self.screen, pygame.Rect(650, 600, 200, 30), "Create Submission", 30, self.createSubmission),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(650, 400, 150, 30), "Full Test", 30, self.fullTest),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(650, 440, 150, 30), "Single Test", 30, self.singleTest),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(650, 500, 150, 30), "Download", 30, self.main.downloadNetwork),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(650, 540, 150, 30), "Upload", 30, self.main.uploadNetwork),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(650, 600, 200, 30), "Create Submission", 30, self.createSubmission),
 
-			button.Button(self.screen, pygame.Rect(100, 610, 30, 30), "<", 40, self.prevImage),
-			button.Button(self.screen, pygame.Rect(135, 610, 30, 30), ">", 40, self.nextImage),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(100, 610, 30, 30), "<", 40, self.prevImage),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(135, 610, 30, 30), ">", 40, self.nextImage),
 
 			#button.Button(self.screen, pygame.Rect(685, 250, 100, 30), "Output", 30, self.getDigitOutput)
 		]
@@ -38,7 +37,7 @@ class Test_Mode():
 
 		self.testData = []
 
-		self.imageRenderer = image_renderer.Image_Renderer(self.screen, pygame.Rect(100,100,500,500))
+		self.imageRenderer = NNPy.Image_Renderer(self.screen, pygame.Rect(100,100,500,500))
 		self.renderImageNum = 0
 
 
@@ -59,33 +58,33 @@ class Test_Mode():
 		self.imageRenderer.render()
 
 		text = self.font.render("Image Num: " + str(self.renderImageNum), True, (0,0,0))
-		self.screen.blit(text, [175,615])
+		NNPy.main.screen.blit(text, [175,615])
 
 		text = self.font.render("TESTING MODE :)", True, (0,0,0))
-		self.screen.blit(text, [660,105])
+		NNPy.main.screen.blit(text, [660,105])
 
 		text = self.font.render("Results: " + self.testOutput, True, (0,0,0))
-		self.screen.blit(text, [660,155])
+		NNPy.main.screen.blit(text, [660,155])
 
-		text = self.font.render("Training Data Length: " + str(len(self.main.trainingData)), True, (0,0,0))
-		self.screen.blit(text, [660,205])
+		text = self.font.render("Training Data Length: " + str(len(NNPy.main.trainingData)), True, (0,0,0))
+		NNPy.main.screen.blit(text, [660,205])
 
 
 
 	def fullTest(self):
-		self.main.test();
+		NNPy.main.test();
 
 	def singleTest(self):
-		output = self.main.nn.getOutput(self.main.trainingData[self.renderImageNum][0])
+		output = NNPy.main.nn.getOutput(NNPy.main.trainingData[self.renderImageNum][0])
 		self.testOutput = ",".join([str(round(i,2)) for i in output])
 
 	def prevImage(self):
 		self.renderImageNum = (self.renderImageNum-1) % len(self.main.trainingData)
-		self.imageRenderer.setImageData(self.main.trainingData[self.renderImageNum][0])
+		self.imageRenderer.setImageData(NNPy.main.trainingData[self.renderImageNum][0])
 
 	def nextImage(self):
 		self.renderImageNum = (self.renderImageNum+1) % len(self.main.trainingData)
-		self.imageRenderer.setImageData(self.main.trainingData[self.renderImageNum][0])
+		self.imageRenderer.setImageData(NNPy.main.trainingData[self.renderImageNum][0])
 
 
 	def createSubmission(self):
@@ -120,7 +119,7 @@ class Test_Mode():
 		print("Performing test")
 		submissionString = "ImageId,Label\n"
 		for k,img in enumerate(self.testData):
-			results = self.main.nn.getOutput(self.testData[k])
+			results = NNPy.main.nn.getOutput(self.testData[k])
 			answer = results.argmax()
 
 			submissionString += str(k+1) + "," + str(answer) + "\n"

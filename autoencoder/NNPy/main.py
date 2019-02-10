@@ -1,8 +1,8 @@
 
 
 import sys, math, json, random, pygame, numpy as np
-from .button import Button
-from .nn import NN, randFloat
+from .button import *
+from .nn import *
 
 class Main():
 	def __init__(self, params):
@@ -18,18 +18,6 @@ class Main():
 		self.buttonList = [
 			Button(self.screen, pygame.Rect(1120, 20, 140, 30), "Mode Switch", 28, self.switch_mode)
 		]
-
-		# Runs the setup function created by user
-		self.setup()
-
-		# Modes
-		self.modeList = [mode(self) for mode in params["modeList"]]
-		#	train_mode.Train_Mode(self),
-		#	test_mode.Test_Mode(self)
-		#]
-		self.modeNum = 0
-		self.mode = self.modeList[self.modeNum]
-
 
 
 	def update(self):	# Starts the main update loop
@@ -113,7 +101,7 @@ class Main():
 		file = open(fileName, "w")
 
 		fileString = ""
-		fileString += json.dumps(self.nn.structure)
+		fileString += json.dumps([int(i) for i in self.nn.structure])
 		fileString += "\n" + json.dumps(self.nn.LEARNING_RATE)
 		fileString += "\n" + json.dumps([i.tolist() for i in self.nn.network])
 
