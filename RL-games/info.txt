@@ -73,9 +73,27 @@ They do so some signs of gradually improving, or gradually getting worse, yet th
 
 
 
+In connect 4 bot:
+
+random vs random
+55.31% first
+44.33% second
 
 
+evolved vs random
+92% first
+82% second
+
+Playing against the evolved bots reveals they always play in a single column. This would have a very large win rate
+against a random bot which rarely blocks. To reveal if they can evolve a deeper strategy I should create a 'good' bot
+that always blocks when it can. This would mean the bot would need to think of a better strategy than just outputting a
+high value for a particular column. Even something as simple as blocking rows should require the bot to evolve a better
+strategy.
 
 
-
-
+When the bots are learning to compete against a simple hard-coded bot, they often reach very high win rates (~0.9)
+I suspect that at these high win rates, the ability to improve further is hard because their win rates due to random 
+chance already fluctuates by such a large margin that a bot which is actually better than another (0.95) might not stay
+in the population.
+I should find a way to test this theory, as it is currently my explaination for the limited results in evolving against
+a 'good' bot. If it is not true, there is something else wrong with the code.

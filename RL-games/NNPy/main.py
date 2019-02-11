@@ -36,7 +36,7 @@ class Main():
 				self.mouseState[3] = (0,0)
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_q:
-					print(self.nn)
+					pass
 
 		self.mouseState[0] = pygame.mouse.get_pos()
 		

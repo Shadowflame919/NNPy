@@ -1,6 +1,6 @@
 
 import sys, math, pygame, random, numpy as np
-import NNPy, tictactoe
+import NNPy, tictactoe, connect4
 
 
 class Train_Mode():
@@ -52,7 +52,7 @@ class Train_Mode():
 
 
 
-		self.botGame = tictactoe.TicTacToeGame()
+		self.botGame = connect4.Connect4Game()
 		self.botScores = np.zeros(NNPy.main.botCount, dtype="int16")
 
 
@@ -61,39 +61,7 @@ class Train_Mode():
 
 
 	def train(self):
-
-		'''
-		testGames = 1000
-		firstWins = 0
-		secondWins = 0
-		ties = 0
-		for i in range(testGames):
-			randomWinnerFirst = self.botGame.playGameAgainstBots(self.botGame.botGood, self.botGame.botRandom)
-			if randomWinnerFirst == 1:
-				firstWins += 1
-			elif randomWinnerFirst == 0:
-				ties += 1
-
-			randomWinnerSecond =  self.botGame.playGameAgainstBots(self.botGame.botRandom, self.botGame.botGood)
-			if randomWinnerSecond == -1:
-				secondWins += 1
-			elif randomWinnerSecond == 0:
-				ties += 1
-
-		print(firstWins, secondWins, ties)
-
-		return'''
-
-		'''
-			A single train runs a whole generation? game?
-
-			Bots play each other bot in a game
-
-
-			About 20 games per tick can be played
-
-		'''
-
+		pass
 		
 		'''
 		# === Score bots based on their ability to beat other bots in population
@@ -102,8 +70,8 @@ class Train_Mode():
 			for b in range(a):
 				# Play a whole game when a is player 1, and b is player -1, and then the other way around
 
-				botA = tictactoe.botNN(self.botGame, NNPy.main.botList[a])
-				botB = tictactoe.botNN(self.botGame, NNPy.main.botList[b])
+				botA = connect4.botNN(self.botGame, NNPy.main.botList[a])
+				botB = connect4.botNN(self.botGame, NNPy.main.botList[b])
 
 				winnerAB = self.botGame.playGameAgainstBots(botA, botB)
 				winnerBA = self.botGame.playGameAgainstBots(botB, botA)
@@ -129,29 +97,34 @@ class Train_Mode():
 		
 		bestBotNN = NNPy.main.botList[self.botScores.argmax()]
 		'''
-
+		#bestBotNN = NNPy.main.botList[0]
 
 		
 		# === Score bots based on their ability to beat a random opponent
 		trainGames = 10
+		trainBot = self.botGame.botGood
 		for a in range(NNPy.main.botCount):
-			bot = tictactoe.botNN(self.botGame, NNPy.main.botList[a])
+			bot = connect4.botNN(self.botGame, NNPy.main.botList[a])
 
 			for i in range(trainGames):
-				randomWinnerFirst = self.botGame.playGameAgainstBots(bot, self.botGame.botRandom)
+				randomWinnerFirst = self.botGame.playGameAgainstBots(bot, trainBot)
 				if randomWinnerFirst == 1:
 					self.botScores[a] += 3
 				elif randomWinnerFirst == 0:
 					self.botScores[a] += 1
 
-				randomWinnerSecond = self.botGame.playGameAgainstBots(self.botGame.botRandom, bot)
+				randomWinnerSecond = self.botGame.playGameAgainstBots(trainBot, bot)
 				if randomWinnerSecond == -1:
 					self.botScores[a] += 3
 				elif randomWinnerSecond == 0:
 					self.botScores[a] += 1
 
 
-		print(self.botScores, round(sum(self.botScores)/(2*3*trainGames*NNPy.main.botCount), 2))
+		print(
+			self.botScores, 
+			round(sum(self.botScores)/(2*3*trainGames*NNPy.main.botCount), 2), 
+			round(self.botScores.max()/(2*3*trainGames),2)
+		)
 
 		bestBotNN = NNPy.main.botList[self.botScores.argmax()]
 		
@@ -191,26 +164,27 @@ class Train_Mode():
 		self.botScores.fill(0)
 		'''
 
-
+		
 		# Play best bot against a random bot and store win rate in graph
 		# Bot needs to play both first, and second
 		testGames = 10	# Test games per type
 		firstWins = 0
 		secondWins = 0
-		bestBot = tictactoe.botNN(self.botGame, bestBotNN)
+		testBot = self.botGame.botGood
+		bestBot = connect4.botNN(self.botGame, bestBotNN)
 		for i in range(testGames):
-			randomWinnerFirst = self.botGame.playGameAgainstBots(bestBot, self.botGame.botRandom)
+			randomWinnerFirst = self.botGame.playGameAgainstBots(bestBot, testBot)
 			if randomWinnerFirst == 1:
 				firstWins += 1
 
-			randomWinnerSecond = self.botGame.playGameAgainstBots(self.botGame.botRandom, bestBot)
+			randomWinnerSecond = self.botGame.playGameAgainstBots(testBot, bestBot)
 			if randomWinnerSecond == -1:
 				secondWins += 1
 
 		self.randomWinRate.append((firstWins + secondWins) / (2*testGames))
 		self.randomWinRateFirst.append(firstWins/testGames)
 		self.randomWinRateSecond.append(secondWins/testGames)
-
+		
 
 	def update(self, mouseState, dt):	
 

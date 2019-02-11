@@ -8,7 +8,7 @@
 
 import sys, math, random, pygame, json, numpy as np
 import NNPy
-import train_mode, test_mode, tictactoe
+import train_mode, test_mode, tictactoe, connect4
 pygame.init()
 
 
@@ -54,7 +54,7 @@ def init(self):
 	self.botCount = 16
 	self.botList = []
 	for i in range(self.botCount):
-		newBot = NNPy.NN([9,32,1], 0.001)
+		newBot = NNPy.NN([42,32,1], 0.001)
 		self.botList.append(newBot)
 
 
