@@ -203,7 +203,7 @@ class Train_Mode():
 			if randomWinnerFirst == 1:
 				firstWins += 1
 
-			randomWinnerSecond = self.botGame.playGameAgainstBots(self.botGame.botGood, botRandom)
+			randomWinnerSecond = self.botGame.playGameAgainstBots(self.botGame.botRandom, bestBot)
 			if randomWinnerSecond == -1:
 				secondWins += 1
 
