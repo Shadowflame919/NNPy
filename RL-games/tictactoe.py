@@ -102,73 +102,8 @@ class TicTacToeGame():
 		return board
 
 
-	def playGame(self, a, b):		# Plays a whole game between two bots (a and b are indexes) and returns the winners index
-		botA = botNN(NNPy.main.botList[a])
-		botB = botNN(NNPy.main.botList[b])
-
-		# Used for bots to loop through each future move and give it a value
-		moveRanks = np.array([-1.]*9)
-
-		while True:		# Loop each move
-
-			# Play move
-			if self.turn == 1:
-				for i in range(9):	# for all possible moves
-					if self.isValidMove(i):
-
-						boardInput = self.getBotInput()
-						boardInput[i] = 1
-
-						moveRanks[i] = botA.getOutput(boardInput)[0]
-
-				#print("A moveranks", moveRanks)
-				selectedMove = moveRanks.argmax()
-				self.move(selectedMove)
-				#print("A moved in ", selectedMove)
-
-				moveRanks.fill(-1)
-
-			else:
-				for i in range(9):	# for all possible moves
-					if self.isValidMove(i):
-
-						boardInput = self.getBotInput()
-						boardInput[i] = 1
-
-						moveRanks[i] = botB.getOutput(boardInput)[0]
-
-				#print("B moveranks", moveRanks)
-				selectedMove = moveRanks.argmax()
-				self.move(selectedMove)
-				#print("B moved in ", selectedMove)
-
-				moveRanks.fill(-1)
-
-			#print(self.board)
-
-			#input()
-
-
-			# First test if game is over
-			if self.isGameOver():
-				if self.turn == 1:
-					self.resetGame()
-					return b
-				else:
-					self.resetGame()
-					return a
-
-			# Then test if game is tie
-			if self.isGameTie():
-				self.resetGame()
-				return -1
-
-
-
 	def playGameAgainstBots(self, botA, botB):		# Plays a whole game between bot A and bot B, with bot A going first
 		# Returns 1 if botA wins, -1 if botB wins, and 0 if tie
-
-		
 
 		while True:		# Loop each move
 
@@ -215,6 +150,17 @@ class botNN():
 				self.moveRanks[i] = self.NN.getOutput(boardInput)[0]
 
 		selectedMove = self.moveRanks.argmax()	# get highest rated move
+
+		'''
+		# Select highest rated move with certain probability
+		while True:
+			selectedMove = self.moveRanks.argmax()	# get highest rated move
+			if random.random() < 0.95 or self.moveRanks.max() == -2:	# pick move with 90% probability (or if all moves have been selected, select this move)
+				break
+			self.moveRanks[selectedMove] = -2
+		'''
+
+
 		self.moveRanks.fill(-1)		# reset move ranks
 
 		return selectedMove

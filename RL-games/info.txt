@@ -1,0 +1,81 @@
+
+
+Why am I having problems with training?
+
+Bots are often able to reach good performance compared to how a perfect player would win against a random bot
+
+Perfect VS Random:
+	98% win rate going first
+	80% win rate going second
+
+Random VS Random:
+	58% win rate going first
+	28% win rate going second
+
+Evolved bot VS Random:
+	~90-95% going first
+	~70% going second
+
+Training often begins with quick learning, then plateuas and there is very little improvement.
+Bots actually seem to occilate between getting worse, and recovering to the same point.
+
+
+Why?
+
+I think the bots are getting stuck in local maxima, and evolving to be better (optimal) is a very steep slope and often requires 
+going downhill. This is understandable for tictactoe, a game with few 'good' strategies. 
+I suspect harder games with more dimentions would work better as their becomes less of an optimal strategy and more of a smooth rating of performance.
+
+
+When trained against a 'Good' bot, the bot performs worse against a random bot than if it were simply trained against a random bot
+This seems counterintuitive, yet I think it can be explained.
+
+Evolved bot (trained against good bot) VS Random:
+	~80% win rate going first
+	~45-50% win rate going second
+
+Evolved bot (trained against good bot) VS Good Bot:
+	~100% win rate going first?  	- I think the good bot has a flaw in it, however this is only evidence for the explanation
+	~85% win rate going second
+
+The "good" bot has very predictable moves, similar to an optimal bot.
+For example, on the first move the good bot always plays in the center.
+This means that the evolved bots never need to learn how to play against a bot that doesn't play in the center every time.
+A random bot however rarely plays in the center first move, and so the bot does not know how to play against a bot that does this.
+This explains the lower win rate for a bot trained against a good bot, than one trained against a random (poor) bot.
+
+
+
+Other methods of selection:
+	I figured that poor results in self-play might be a result of all the agents becoming too similar and overfitting to a specific type of bot.
+	To ensure diversity, I tried a new method of selection that involves keeping the best half of the bots exactly as they are, and applying mutations
+	to the worst half.
+	This would in theory keep the bots structurely different, but im not sure if they will remain strategically different.
+	This method does NOT produce good results when training against a random bot.
+	
+	Evolved bot (evolved with worst-half-mutations) VS Random:
+		~80% win rate when first
+		~50% win rate when second
+
+
+
+
+And now, how can I apply this to self-play?
+
+In self-play, bots play one game against each other bot in the population.
+Bots rarely seem to get very good.
+They do so some signs of gradually improving, or gradually getting worse, yet the direction of which seems unpredictable.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

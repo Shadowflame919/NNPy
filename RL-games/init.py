@@ -54,7 +54,7 @@ def init(self):
 	self.botCount = 16
 	self.botList = []
 	for i in range(self.botCount):
-		newBot = NNPy.NN([9,16,1], 0.001)
+		newBot = NNPy.NN([9,32,1], 0.001)
 		self.botList.append(newBot)
 
 

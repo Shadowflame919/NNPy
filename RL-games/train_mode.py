@@ -69,15 +69,15 @@ class Train_Mode():
 		ties = 0
 		for i in range(testGames):
 			randomWinnerFirst = self.botGame.playGameAgainstBots(self.botGame.botGood, self.botGame.botRandom)
-			if randomWinnerFirst == 0:
+			if randomWinnerFirst == 1:
 				firstWins += 1
-			elif randomWinnerFirst == -1:
+			elif randomWinnerFirst == 0:
 				ties += 1
 
 			randomWinnerSecond =  self.botGame.playGameAgainstBots(self.botGame.botRandom, self.botGame.botGood)
-			if randomWinnerSecond == 1:
+			if randomWinnerSecond == -1:
 				secondWins += 1
-			elif randomWinnerSecond == -1:
+			elif randomWinnerSecond == 0:
 				ties += 1
 
 		print(firstWins, secondWins, ties)
@@ -94,25 +94,45 @@ class Train_Mode():
 
 		'''
 
-		# Play games between each possible pair of bots
+		
 		'''
+		# === Score bots based on their ability to beat other bots in population
+		# Play games between each possible pair of bots
 		for a in range(NNPy.main.botCount):
 			for b in range(a):
 				# Play a whole game when a is player 1, and b is player -1, and then the other way around
 
-				winnerAB = self.botGame.playGame(a,b)
-				winnerBA = self.botGame.playGame(b,a)
+				botA = tictactoe.botNN(self.botGame, NNPy.main.botList[a])
+				botB = tictactoe.botNN(self.botGame, NNPy.main.botList[b])
 
-				#print(a,b,"->",winnerAB)
-				#print(b,a,"->",winnerBA)
+				winnerAB = self.botGame.playGameAgainstBots(botA, botB)
+				winnerBA = self.botGame.playGameAgainstBots(botB, botA)
 
-				if winnerAB != -1:
-					self.botScores[winnerAB] += 1
+				if winnerAB == 1:
+					self.botScores[a] += 3
+				elif winnerAB == -1:
+					self.botScores[b] += 3
+				else:
+					self.botScores[a] += 1
+					self.botScores[b] += 1
 
-				if winnerBA != -1:
-					self.botScores[winnerBA] += 1
+				if winnerBA == 1:
+					self.botScores[b] += 3
+				elif winnerBA == -1:
+					self.botScores[a] += 3
+				else:
+					self.botScores[a] += 1
+					self.botScores[b] += 1
+
+
+		print(self.botScores)
+		
+		bestBotNN = NNPy.main.botList[self.botScores.argmax()]
 		'''
 
+
+		
+		# === Score bots based on their ability to beat a random opponent
 		trainGames = 10
 		for a in range(NNPy.main.botCount):
 			bot = tictactoe.botNN(self.botGame, NNPy.main.botList[a])
@@ -132,11 +152,12 @@ class Train_Mode():
 
 
 		print(self.botScores, round(sum(self.botScores)/(2*3*trainGames*NNPy.main.botCount), 2))
-	
 
-		random.seed(pygame.time.get_ticks())
+		bestBotNN = NNPy.main.botList[self.botScores.argmax()]
+		
 
-		# Remove worst half of bots
+		
+		# === Remove worst half of bots and replace with children of best half
 		newBotList = []
 		for i in range(int(NNPy.main.botCount/2)):
 			bestBotIndex = self.botScores.argmax()	# Get best bots index
@@ -153,8 +174,22 @@ class Train_Mode():
 
 		# Reset bot scores
 		self.botScores.fill(0)
+		
 
+		'''
+		# === Apply mutations to worst half of bots ===
+		for i in range(int(NNPy.main.botCount/2)):
+			worstBotIndex = self.botScores.argmin()	# Get worst bots index
 
+			# Don't make bot get picked again by giving it a max score
+			self.botScores[worstBotIndex] = NNPy.main.botCount * 2
+
+			# Replace bad bot with a child of itself
+			NNPy.main.botList[worstBotIndex] = NNPy.main.botList[worstBotIndex].getChild(0.05)
+
+		# Reset bot scores
+		self.botScores.fill(0)
+		'''
 
 
 		# Play best bot against a random bot and store win rate in graph
@@ -162,14 +197,13 @@ class Train_Mode():
 		testGames = 10	# Test games per type
 		firstWins = 0
 		secondWins = 0
-
+		bestBot = tictactoe.botNN(self.botGame, bestBotNN)
 		for i in range(testGames):
-			bot = tictactoe.botNN(self.botGame, NNPy.main.botList[0])
-			randomWinnerFirst = self.botGame.playGameAgainstBots(bot, self.botGame.botRandom)
+			randomWinnerFirst = self.botGame.playGameAgainstBots(bestBot, self.botGame.botRandom)
 			if randomWinnerFirst == 1:
 				firstWins += 1
 
-			randomWinnerSecond = self.botGame.playGameAgainstBots(self.botGame.botRandom, bot)
+			randomWinnerSecond = self.botGame.playGameAgainstBots(self.botGame.botGood, botRandom)
 			if randomWinnerSecond == -1:
 				secondWins += 1
 
