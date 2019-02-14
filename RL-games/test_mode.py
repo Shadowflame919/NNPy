@@ -20,7 +20,7 @@ class Test_Mode():
 		self.imageRendererCustom = NNPy.Image_Renderer(NNPy.main.screen, pygame.Rect(900,100,280,280))
 
 		self.buttonList = [
-			NNPy.Button(NNPy.main.screen, pygame.Rect(780, 20, 150, 30), "Download", 30, NNPy.main.downloadNetwork),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(780, 20, 150, 30), "Download", 30, self.downloadBot),
 			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 20, 150, 30), "Upload", 30, NNPy.main.uploadNetwork),
 
 			NNPy.Button(NNPy.main.screen, pygame.Rect(800, 400, 150, 30), "Random Move", 30, self.randomMove),
@@ -38,17 +38,17 @@ class Test_Mode():
 		self.game = connect4.Connect4Game()
 
 		self.gameOver = False
-
+		self.gameText = ""
 
 		self.testResults = ""
 
 
 	def update(self, mouseState, dt):	
 
-		self.gameOver = self.game.isGameOver() or self.game.isGameTie()
-
 		if not self.gameOver:
-			self.game.update(mouseState)
+			winner = self.game.update(mouseState)
+			if winner != None:
+				self.endGame(winner)
 
 
 	def render(self, mouseState):
@@ -56,8 +56,7 @@ class Test_Mode():
 		self.game.render(mouseState)
 
 		if self.gameOver:
-			winner = "Red (1)" if (self.game.turn==-1) else "Black (-1)"
-			text = self.font.render("Winner: " + winner, True, (0,0,0))
+			text = self.font.render(self.gameText, True, (0,0,0))
 			NNPy.main.screen.blit(text, [760,105])
 
 		text = self.font.render(self.testResults, True, (0,0,0))
@@ -65,48 +64,40 @@ class Test_Mode():
 
 
 	def botMove(self):
-
 		if not self.gameOver:
-
 			bot = connect4.botNN(self.game, NNPy.main.botList[0])
 			move = bot.getMove()
-			self.game.move(move)
 
-			if self.game.isGameOver():
-				print("Winner: ", -self.game.turn)
-			elif self.game.isGameTie():
-				print("Tie")
-
+			winner = self.game.move(move)
+			if winner != None:
+				self.endGame(winner)
 
 	def randomMove(self):
-
 		if not self.gameOver:
-
 			move = self.game.botRandom.getMove()
-			self.game.move(move)
 
-			if self.game.isGameOver():
-				print("Winner: ", -self.game.turn)
-			elif self.game.isGameTie():
-				print("Tie")
-
+			winner = self.game.move(move)
+			if winner != None:
+				self.endGame(winner)
 
 	def goodMove(self):
-
 		if not self.gameOver:
-
 			move = self.game.botGood.getMove()
-			self.game.move(move)
 
-			if self.game.isGameOver():
-				print("Winner: ", -self.game.turn)
-			elif self.game.isGameTie():
-				print("Tie")
+			winner = self.game.move(move)
+			if winner != None:
+				self.endGame(winner)
 
+
+	def endGame(self, winner):
+		print("Winner: ", winner)
+		self.gameText = "Winner: " + ("Tie (0)" if winner==0 else ("Red (1)" if winner==1 else "Black (-1)"))
+		self.gameOver = True
 
 	def resetGame(self):
 		self.game.resetGame()
-
+		self.gameOver = False
+		self.gameText = ""
 
 
 	def testBotAgainstGood(self):	# Tests the best bot against a good bot and displays result on screen
@@ -182,3 +173,10 @@ class Test_Mode():
 				ties += 1
 
 		self.testResults = str(firstWins) + ", " + str(secondWins) + ", " + str(ties) + " (" + str(testGames) + ") - Good VS Random"
+
+
+
+	def downloadBot(self):
+		print("Downloading bot 0")
+		NNPy.main.nn = NNPy.main.botList[0]
+		NNPy.main.downloadNetwork

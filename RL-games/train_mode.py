@@ -172,7 +172,7 @@ class Train_Mode():
 			
 			# Play best bot against a random bot and store win rate in graph
 			# Bot needs to play both first, and second
-			testGames = 10	# Test games per type
+			testGames = 16	# Test games per type
 			firstWins = 0
 			secondWins = 0
 			testBot = self.botGame.botGood
