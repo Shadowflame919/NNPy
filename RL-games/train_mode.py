@@ -55,8 +55,8 @@ class Train_Mode():
 		self.botGame = connect4.Connect4Game()
 		self.botScores = np.zeros(NNPy.main.botCount, dtype="int16")
 
-
-
+		self.trainGames = 32	# Numbers of games each bot plays per generation
+		self.trainBotNum = 0	# Current bot being trained for this particular train (bots are cycled through each train)
 
 
 
@@ -101,90 +101,97 @@ class Train_Mode():
 
 		
 		# === Score bots based on their ability to beat a random opponent
-		trainGames = 10
-		trainBot = self.botGame.botGood
-		for a in range(NNPy.main.botCount):
-			bot = connect4.botNN(self.botGame, NNPy.main.botList[a])
+		if (self.trainBotNum < NNPy.main.botCount):		# Get the performance of a single bot
 
-			for i in range(trainGames):
+			bot = connect4.botNN(self.botGame, NNPy.main.botList[self.trainBotNum])		# Bot to train
+			trainBot = self.botGame.botGood		# Bot to train against
+
+			for i in range(self.trainGames):
 				randomWinnerFirst = self.botGame.playGameAgainstBots(bot, trainBot)
 				if randomWinnerFirst == 1:
-					self.botScores[a] += 3
+					self.botScores[self.trainBotNum] += 3
 				elif randomWinnerFirst == 0:
-					self.botScores[a] += 1
+					self.botScores[self.trainBotNum] += 1
 
 				randomWinnerSecond = self.botGame.playGameAgainstBots(trainBot, bot)
 				if randomWinnerSecond == -1:
-					self.botScores[a] += 3
+					self.botScores[self.trainBotNum] += 3
 				elif randomWinnerSecond == 0:
-					self.botScores[a] += 1
+					self.botScores[self.trainBotNum] += 1
+
+			self.trainBotNum += 1
 
 
-		print(
-			self.botScores, 
-			round(sum(self.botScores)/(2*3*trainGames*NNPy.main.botCount), 2), 
-			round(self.botScores.max()/(2*3*trainGames),2)
-		)
+		else:	# Create next generation of bots
+			self.trainBotNum = 0
 
-		bestBotNN = NNPy.main.botList[self.botScores.argmax()]
-		
+			print(
+				self.botScores, 
+				round(sum(self.botScores)/(2*3*self.trainGames*NNPy.main.botCount), 2), 
+				round(self.botScores.max()/(2*3*self.trainGames),2)
+			)
 
-		
-		# === Remove worst half of bots and replace with children of best half
-		newBotList = []
-		for i in range(int(NNPy.main.botCount/2)):
-			bestBotIndex = self.botScores.argmax()	# Get best bots index
-			self.botScores[bestBotIndex] = -1	# Don't make bot get picked again
+			bestBotNN = NNPy.main.botList[self.botScores.argmax()]
+			
 
-			bestBot = NNPy.main.botList[bestBotIndex]
-			bestBotChild = bestBot.getChild(0.05)
+			
+			# === Remove worst half of bots and replace with children of best half
+			newBotList = []
+			for i in range(int(NNPy.main.botCount/2)):
+				bestBotIndex = self.botScores.argmax()	# Get best bots index
+				self.botScores[bestBotIndex] = -1	# Don't make bot get picked again
 
-			# Add bot and its child to bot list
-			newBotList.append(bestBot)
-			newBotList.append(bestBotChild)		
+				bestBot = NNPy.main.botList[bestBotIndex]
+				bestBotChild = bestBot.getChild(0.05)
 
-		NNPy.main.botList = newBotList
+				# Add bot and its child to bot list
+				newBotList.append(bestBot)
+				newBotList.append(bestBotChild)		
 
-		# Reset bot scores
-		self.botScores.fill(0)
-		
+			NNPy.main.botList = newBotList
 
-		'''
-		# === Apply mutations to worst half of bots ===
-		for i in range(int(NNPy.main.botCount/2)):
-			worstBotIndex = self.botScores.argmin()	# Get worst bots index
+			# Reset bot scores
+			self.botScores.fill(0)
+			
 
-			# Don't make bot get picked again by giving it a max score
-			self.botScores[worstBotIndex] = NNPy.main.botCount * 2
+			'''
+			# === Apply mutations to worst half of bots ===
+			for i in range(int(NNPy.main.botCount/2)):
+				worstBotIndex = self.botScores.argmin()	# Get worst bots index
 
-			# Replace bad bot with a child of itself
-			NNPy.main.botList[worstBotIndex] = NNPy.main.botList[worstBotIndex].getChild(0.05)
+				# Don't make bot get picked again by giving it a max score
+				self.botScores[worstBotIndex] = NNPy.main.botCount * 2
 
-		# Reset bot scores
-		self.botScores.fill(0)
-		'''
+				# Replace bad bot with a child of itself
+				NNPy.main.botList[worstBotIndex] = NNPy.main.botList[worstBotIndex].getChild(0.05)
 
-		
-		# Play best bot against a random bot and store win rate in graph
-		# Bot needs to play both first, and second
-		testGames = 10	# Test games per type
-		firstWins = 0
-		secondWins = 0
-		testBot = self.botGame.botGood
-		bestBot = connect4.botNN(self.botGame, bestBotNN)
-		for i in range(testGames):
-			randomWinnerFirst = self.botGame.playGameAgainstBots(bestBot, testBot)
-			if randomWinnerFirst == 1:
-				firstWins += 1
+			# Reset bot scores
+			self.botScores.fill(0)
+			'''
 
-			randomWinnerSecond = self.botGame.playGameAgainstBots(testBot, bestBot)
-			if randomWinnerSecond == -1:
-				secondWins += 1
+			
+			# Play best bot against a random bot and store win rate in graph
+			# Bot needs to play both first, and second
+			testGames = 10	# Test games per type
+			firstWins = 0
+			secondWins = 0
+			testBot = self.botGame.botGood
+			bestBot = connect4.botNN(self.botGame, bestBotNN)
+			for i in range(testGames):
+				randomWinnerFirst = self.botGame.playGameAgainstBots(bestBot, testBot)
+				if randomWinnerFirst == 1:
+					firstWins += 1
 
-		self.randomWinRate.append((firstWins + secondWins) / (2*testGames))
-		self.randomWinRateFirst.append(firstWins/testGames)
-		self.randomWinRateSecond.append(secondWins/testGames)
-		
+				randomWinnerSecond = self.botGame.playGameAgainstBots(testBot, bestBot)
+				if randomWinnerSecond == -1:
+					secondWins += 1
+
+			self.randomWinRate.append((firstWins + secondWins) / (2*testGames))
+			self.randomWinRateFirst.append(firstWins/testGames)
+			self.randomWinRateSecond.append(secondWins/testGames)
+			
+
+
 
 	def update(self, mouseState, dt):	
 
@@ -219,6 +226,11 @@ class Train_Mode():
 		text = self.font.render(str(NNPy.main.botList[0].LEARNING_RATE), True, (0,0,0))
 		NNPy.main.screen.blit(text, [1050,620])
 
+
+		# Draw training bot number
+		text = self.font.render("Bot Num: " + str(self.trainBotNum), True, (0,0,0))
+		NNPy.main.screen.blit(text, [1050,400])
+		
 
 
 

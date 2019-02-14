@@ -30,6 +30,7 @@ class Test_Mode():
 
 			NNPy.Button(NNPy.main.screen, pygame.Rect(1000, 400, 150, 30), "Test Random", 30, self.testBotAgainstRandom),
 			NNPy.Button(NNPy.main.screen, pygame.Rect(1000, 450, 150, 30), "Test Good", 30, self.testBotAgainstGood),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(1000, 500, 150, 30), "Good VS Rand", 30, self.testGoodVSRandom),
 
 		]
 
@@ -157,4 +158,27 @@ class Test_Mode():
 		self.testResults = str(firstWins) + ", " + str(secondWins) + ", " + str(ties) + " (" + str(testGames) + ") - VS Random"
 		#print(firstWins, secondWins, ties)
 
-		
+	
+	def testGoodVSRandom(self):
+		testGames = 100
+		firstWins = 0
+		secondWins = 0
+		ties = 0
+
+		botA = self.game.botGood
+		botB = self.game.botRandom
+
+		for i in range(testGames):
+			randomWinnerFirst = self.game.playGameAgainstBots(botA, botB)
+			if randomWinnerFirst == 1:
+				firstWins += 1
+			elif randomWinnerFirst == 0:
+				ties += 1
+
+			randomWinnerSecond =  self.game.playGameAgainstBots(botB, botA)
+			if randomWinnerSecond == -1:
+				secondWins += 1
+			elif randomWinnerSecond == 0:
+				ties += 1
+
+		self.testResults = str(firstWins) + ", " + str(secondWins) + ", " + str(ties) + " (" + str(testGames) + ") - Good VS Random"
