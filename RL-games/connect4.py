@@ -69,82 +69,86 @@ class Connect4Game():
 			if self.board[col][row] == 0:
 
 				self.board[col][row] = self.turn
-			
+				self.turnNum += 1			
 
-				# === Now check whether 4 in a row has been created ===
+				winner = self.doesMoveEndGame(col, row, self.turn)
 
-				# Check whether piece creates vertical 4 in a row
-				count = 1
-				for rowBelow in range(row-1, max(row-4,-1), -1):
-					if self.board[col][rowBelow] == self.turn:
-						count += 1
-						if count == 4:
-							return self.turn
+				if winner == None:
+					self.turn *= -1
 				
-				
-				# Check if piece creates horizontal 4 in a row
-				count = 1
-
-				for colRight in range(col+1, min(col+4,7)):
-					if self.board[colRight][row] == self.turn:
-						count += 1
-					else:
-						break	
-
-				for colLeft in range(col-1, max(col-4,-1), -1):
-					if self.board[colLeft][row] == self.turn:
-						count += 1
-					else:
-						break
-
-				if count >= 4:
-					return self.turn
+				return winner
 
 
-				# Check whether piece create diagonal TL to BR
-				count = 1
+	def doesMoveEndGame(self, col, row, turn):	# Returns whether moving in a particular position ends the game
+		# Returns 1, 0, or -1 if this particular move ends the game, otherwise return None
 
-				for offset in range(1, 4):		# Bottom right of piece
-					if col+offset==7 or row-offset==-1 or self.board[col+offset][row-offset] != self.turn:
-						break
-					count += 1
+		# Check whether piece creates vertical 4 in a row
+		count = 1
+		for rowBelow in range(row-1, max(row-4,-1), -1):
+			if self.board[col][rowBelow] == turn:
+				count += 1
+				if count == 4:
+					return turn
+		
+		
+		# Check if piece creates horizontal 4 in a row
+		count = 1
 
-				for offset in range(1, 4):	# Top left of piece
-					if col-offset==-1 or row+offset==6 or self.board[col-offset][row+offset] != self.turn:
-						break
-					count += 1
+		for colRight in range(col+1, min(col+4,7)):
+			if self.board[colRight][row] == turn:
+				count += 1
+			else:
+				break	
 
-				if count >= 4:
-					return self.turn
+		for colLeft in range(col-1, max(col-4,-1), -1):
+			if self.board[colLeft][row] == turn:
+				count += 1
+			else:
+				break
 
-
-				# Check whether piece create diagonal TR to BL
-				count = 1
-
-				for offset in range(1, 4):		# Bottom left of piece
-					if col-offset==-1 or row-offset==-1 or self.board[col-offset][row-offset] != self.turn:
-						break
-					count += 1
-
-				for offset in range(1, 4):	# Top right of piece
-					if col+offset==7 or row+offset==6 or self.board[col+offset][row+offset] != self.turn:
-						break
-					count += 1
-
-				if count >= 4:
-					return self.turn
+		if count >= 4:
+			return turn
 
 
-				self.turnNum += 1
-				self.turn *= -1
+		# Check whether piece create diagonal TL to BR
+		count = 1
 
-				# Game is tie since all squares are filled
-				if self.turnNum == 42:
-					return 0
+		for offset in range(1, 4):		# Bottom right of piece
+			if col+offset==7 or row-offset==-1 or self.board[col+offset][row-offset] != turn:
+				break
+			count += 1
 
-				return None
+		for offset in range(1, 4):	# Top left of piece
+			if col-offset==-1 or row+offset==6 or self.board[col-offset][row+offset] != turn:
+				break
+			count += 1
 
-		print("Attempting to play when board is full?")
+		if count >= 4:
+			return turn
+
+
+		# Check whether piece create diagonal TR to BL
+		count = 1
+
+		for offset in range(1, 4):		# Bottom left of piece
+			if col-offset==-1 or row-offset==-1 or self.board[col-offset][row-offset] != turn:
+				break
+			count += 1
+
+		for offset in range(1, 4):	# Top right of piece
+			if col+offset==7 or row+offset==6 or self.board[col+offset][row+offset] != turn:
+				break
+			count += 1
+
+		if count >= 4:
+			return turn
+
+		# Game is tie since all squares are filled
+		if self.turnNum == 42:
+			return 0
+
+		# Move does NOT end game
+		return None
 
 
 
@@ -251,7 +255,7 @@ class botGood():
 
 		# Check for winning placements
 		for col in range(7):
-			# If move has no free slots, skip move
+			# If move has no free slots, skip this column
 			if self.game.board[col][5] != 0:
 				continue
 
@@ -261,74 +265,21 @@ class botGood():
 				if self.game.board[col][row] == 0:
 					break
 
-			
-			# Check whether piece creates vertical 4 in a row
-			count = 1
-			for rowBelow in range(row-1, max(row-4,-1), -1):
-				if self.game.board[col][rowBelow] == self.game.turn:
-					count += 1
-					if count == 4:
-						return col
-			
-			
-			# Check if piece creates horizontal 4 in a row
-			count = 1
+			winner = self.game.doesMoveEndGame(col, row, self.game.turn)
 
-			for colRight in range(col+1, min(col+4,7)):
-				if self.game.board[colRight][row] == self.game.turn:
-					count += 1
-				else:
-					break	
-
-			for colLeft in range(col-1, max(col-4,-1), -1):
-				if self.game.board[colLeft][row] == self.game.turn:
-					count += 1
-				else:
-					break
-
-			if count >= 4:
-				return col
+			if winner == None:
+				continue
+			return col
 
 
-			# Check whether piece create diagonal TL to BR
-			count = 1
+		# Return a random 'safe' move
+		self.validMoves.fill(0)
+		self.validMoveCount = 0
 
-			for offset in range(1, 4):		# Bottom right of piece
-				if col+offset==7 or row-offset==-1 or self.game.board[col+offset][row-offset] != self.game.turn:
-					break
-				count += 1
-
-			for offset in range(1, 4):	# Top left of piece
-				if col-offset==-1 or row+offset==6 or self.game.board[col-offset][row+offset] != self.game.turn:
-					break
-				count += 1
-
-			if count >= 4:
-				return col
-
-
-			# Check whether piece create diagonal TR to BL
-			count = 1
-
-			for offset in range(1, 4):		# Bottom left of piece
-				if col-offset==-1 or row-offset==-1 or self.game.board[col-offset][row-offset] != self.game.turn:
-					break
-				count += 1
-
-			for offset in range(1, 4):	# Top right of piece
-				if col+offset==7 or row+offset==6 or self.game.board[col+offset][row+offset] != self.game.turn:
-					break
-				count += 1
-
-			if count >= 4:
-				return col
-
-
-
-
+		
 		# Check for blocking placements
 		for col in range(7):
-			# If move has no free slots, skip move
+			# If move has no free slots, skip this column
 			if self.game.board[col][5] != 0:
 				continue
 
@@ -338,68 +289,22 @@ class botGood():
 				if self.game.board[col][row] == 0:
 					break
 
-			
-			# Check whether piece creates vertical 4 in a row
-			count = 1
-			for rowBelow in range(row-1, max(row-4,-1), -1):
-				if self.game.board[col][rowBelow] == -self.game.turn:
-					count += 1
-					if count == 4:
-						return col
-			
-			
-			# Check if piece creates horizontal 4 in a row
-			count = 1
 
-			for colRight in range(col+1, min(col+4,7)):
-				if self.game.board[colRight][row] == -self.game.turn:
-					count += 1
-				else:
-					break	
-
-			for colLeft in range(col-1, max(col-4,-1), -1):
-				if self.game.board[colLeft][row] == -self.game.turn:
-					count += 1
-				else:
-					break
-
-			if count >= 4:
+			# If piece blocks opponent, always play here
+			winner = self.game.doesMoveEndGame(col, row, -self.game.turn)
+			if winner == -self.game.turn:
 				return col
 
 
-			# Check whether piece create diagonal TL to BR
-			count = 1
-
-			for offset in range(1, 4):		# Bottom right of piece
-				if col+offset==7 or row-offset==-1 or self.game.board[col+offset][row-offset] != -self.game.turn:
-					break
-				count += 1
-
-			for offset in range(1, 4):	# Top left of piece
-				if col-offset==-1 or row+offset==6 or self.game.board[col-offset][row+offset] != -self.game.turn:
-					break
-				count += 1
-
-			if count >= 4:
-				return col
+			# Add moves that don't cause opponent to win next turn (safe moves)
+			if row == 5 or self.game.doesMoveEndGame(col, row+1, -self.game.turn) == None:
+				self.validMoves[self.validMoveCount] = col
+				self.validMoveCount += 1
 
 
-			# Check whether piece create diagonal TR to BL
-			count = 1
-
-			for offset in range(1, 4):		# Bottom left of piece
-				if col-offset==-1 or row-offset==-1 or self.game.board[col-offset][row-offset] != -self.game.turn:
-					break
-				count += 1
-
-			for offset in range(1, 4):	# Top right of piece
-				if col+offset==7 or row+offset==6 or self.game.board[col+offset][row+offset] != -self.game.turn:
-					break
-				count += 1
-
-			if count >= 4:
-				return col
-
+		# Pick a random move from this list of 'safe' moves
+		if self.validMoveCount > 0:
+			return self.validMoves[ random.randint(0,self.validMoveCount-1) ]
 
 
 		# Return a random move
@@ -410,105 +315,3 @@ class botGood():
 				self.validMoves[self.validMoveCount] = i
 				self.validMoveCount += 1
 		return self.validMoves[ random.randint(0,self.validMoveCount-1) ]
-
-
-'''
-	def isGameOver(self):	# Returns whether game is over based on current boardstate
-		
-		#	Efficiency can probably be improved greatly by testing for any 4 in a row generated by the most recently placed piece,
-		#	rather than scanning entire board each move
-		
-
-		# First check for vertical wins
-		# This requires first a test in the middle piece, as this determines whether a win is even possible
-		# Test for a piece in the higher positions first, as these are less likely to have pieces
-		for col in range(7):
-			comparePiece = self.board[col][3]	# Player (1 or -1) who may potentially have 4 in a row in this column
-			if comparePiece==0:		# If this square is zero, player cannot have a 4 in a row here
-				continue
-
-			# loop through col, counting for sequence of 4
-			count = 0
-			for row in range(6):
-				if self.board[col][row] == comparePiece:
-					count += 1
-					if count == 4:
-						return True
-				else:
-					count = 0
-
-
-		# Test for 4 in a row in each row
-		for row in range(6):
-			comparePiece = self.board[3][row]	# Player (1 or -1) who may potentially have 4 in a row in this row
-			if comparePiece==0:		# If this square is zero, player cannot have a 4 in a row here
-				continue
-
-			# loop through row, counting for sequence of 4
-			count = 0
-			for col in range(7):
-				if self.board[col][row] == comparePiece:
-					count += 1
-					if count == 4:
-						return True
-				else:
-					count = 0
-
-		
-		# Test for 4 in a row in each diagonal
-		# Testing along 4th row up should test for each diagonal
-		for col in range(7):
-			comparePiece = self.board[col][3]
-			if comparePiece==0:		# If this square is zero, player cannot have a 4 through any diagonal here
-				continue
-
-			# test for TL->BR diag
-			if col <= 5:
-				count = 0
-
-				# start diagonal at top/left of board
-				startCol = 0
-				startRow = 5
-				if col <= 2: 
-					startRow = 3 + col
-				else:
-					startCol = col - 2
-				
-				# count for pieces down and right
-				offset=0
-				while True:
-					if self.board[startCol+offset][startRow-offset] == comparePiece:
-						count += 1
-						if count == 4:
-							return True
-					else:
-						count = 0
-					offset += 1
-					if startCol+offset==7 or startRow-offset==-1:	# If the next piece is off the board, break loop
-						break
-
-			# test for TR->BL diag
-			if col >= 1:
-				count = 0
-
-				# start diagonal at top/right of board
-				startCol = 6
-				startRow = 5
-				if col >= 4: 
-					startRow = 9 - col
-				else:
-					startCol = col + 2
-				
-				# count for pieces down and left
-				offset=0
-				while True:
-					if self.board[startCol-offset][startRow-offset] == comparePiece:
-						count += 1
-						if count == 4:
-							return True
-					else:
-						count = 0
-					offset += 1
-					if startCol+offset==-1 or startRow-offset==-1:	# If the next piece is off the board, break loop
-						break
-'''

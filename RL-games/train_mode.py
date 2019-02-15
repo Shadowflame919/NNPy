@@ -55,7 +55,7 @@ class Train_Mode():
 		self.botGame = connect4.Connect4Game()
 		self.botScores = np.zeros(NNPy.main.botCount, dtype="int16")
 
-		self.trainGames = 32	# Numbers of games each bot plays per generation
+		self.trainGames = 64	# Numbers of games each bot plays per generation
 		self.trainBotNum = 0	# Current bot being trained for this particular train (bots are cycled through each train)
 
 
@@ -172,7 +172,7 @@ class Train_Mode():
 			
 			# Play best bot against a random bot and store win rate in graph
 			# Bot needs to play both first, and second
-			testGames = 16	# Test games per type
+			testGames = 32	# Test games per type
 			firstWins = 0
 			secondWins = 0
 			testBot = self.botGame.botGood

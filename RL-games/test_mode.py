@@ -21,17 +21,18 @@ class Test_Mode():
 
 		self.buttonList = [
 			NNPy.Button(NNPy.main.screen, pygame.Rect(780, 20, 150, 30), "Download", 30, self.downloadBot),
-			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 20, 150, 30), "Upload", 30, NNPy.main.uploadNetwork),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 20, 150, 30), "Upload", 30, self.uploadBot),
 
-			NNPy.Button(NNPy.main.screen, pygame.Rect(800, 400, 150, 30), "Random Move", 30, self.randomMove),
-			NNPy.Button(NNPy.main.screen, pygame.Rect(800, 450, 150, 30), "Good Move", 30, self.goodMove),
-			NNPy.Button(NNPy.main.screen, pygame.Rect(800, 500, 150, 30), "Bot Move", 30, self.botMove),
-			NNPy.Button(NNPy.main.screen, pygame.Rect(800, 550, 150, 30), "Reset Game", 30, self.resetGame),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(775, 400, 150, 30), "Random Move", 30, self.randomMove),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(775, 450, 150, 30), "Good Move", 30, self.goodMove),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(775, 500, 150, 30), "Bot Move", 30, self.botMove),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(775, 550, 150, 30), "Reset Game", 30, self.resetGame),
 
-			NNPy.Button(NNPy.main.screen, pygame.Rect(1000, 400, 150, 30), "Test Random", 30, self.testBotAgainstRandom),
-			NNPy.Button(NNPy.main.screen, pygame.Rect(1000, 450, 150, 30), "Test Good", 30, self.testBotAgainstGood),
-			NNPy.Button(NNPy.main.screen, pygame.Rect(1000, 500, 150, 30), "Good VS Rand", 30, self.testGoodVSRandom),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 400, 150, 30), "Test Random", 30, self.testBotAgainstRandom),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 450, 150, 30), "Test Good", 30, self.testBotAgainstGood),
+			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 500, 150, 30), "Good VS Rand", 30, self.testGoodVSRandom),
 
+			NNPy.Button(NNPy.main.screen, pygame.Rect(950, 550, 150, 30), "Test Good Big", 30, self.testBotAgainstGoodBig),
 		]
 
 
@@ -98,6 +99,22 @@ class Test_Mode():
 		self.game.resetGame()
 		self.gameOver = False
 		self.gameText = ""
+
+
+
+	def downloadBot(self):
+		print("Downloading bot 0")
+		NNPy.main.nn = NNPy.main.botList[0]
+		NNPy.main.downloadNetwork()
+
+	def uploadBot(self):
+		print("Uploading bot")
+		NNPy.main.uploadNetwork()
+
+		for i in range(NNPy.main.botCount):
+			NNPy.main.botList[i] = NNPy.main.nn.getCopy()
+
+
 
 
 	def testBotAgainstGood(self):	# Tests the best bot against a good bot and displays result on screen
@@ -176,7 +193,31 @@ class Test_Mode():
 
 
 
-	def downloadBot(self):
-		print("Downloading bot 0")
-		NNPy.main.nn = NNPy.main.botList[0]
-		NNPy.main.downloadNetwork
+
+	def testBotAgainstGoodBig(self):	# Tests the best bot against a good bot and displays result on screen
+		testGames = 1000
+		firstWins = 0
+		secondWins = 0
+		ties = 0
+
+		botA = connect4.botNN(self.game, NNPy.main.botList[0])
+		botB = self.game.botGood
+		for i in range(testGames):
+			if i%100==0:
+				print("Test Game", i)
+
+			randomWinnerFirst = self.game.playGameAgainstBots(botA, botB)
+			if randomWinnerFirst == 1:
+				firstWins += 1
+			elif randomWinnerFirst == 0:
+				ties += 1
+
+			randomWinnerSecond =  self.game.playGameAgainstBots(botB, botA)
+			if randomWinnerSecond == -1:
+				secondWins += 1
+			elif randomWinnerSecond == 0:
+				ties += 1
+
+		self.testResults = str(firstWins) + ", " + str(secondWins) + ", " + str(ties) + " (" + str(testGames) + ") - VS Good"
+		#self.testResults += " (" + str(round(firstWins/testGames, 3)) + ", " + str(round(secondWins/testGames, 3)) + ")"
+		#print(firstWins, secondWins, ties)
